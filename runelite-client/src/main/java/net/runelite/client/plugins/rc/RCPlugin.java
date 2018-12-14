@@ -25,7 +25,7 @@
  */
 package net.runelite.client.plugins.rc;
 
-import com.google.common.eventbus.Subscribe;
+import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.util.Collection;
