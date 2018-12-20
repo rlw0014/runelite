@@ -121,4 +121,14 @@ public interface BAToolsConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "prayerMetronome",
+		name = "Prayer Metronome",
+		description = "asd"
+	)
+	default boolean prayerMetronome()
+	{
+		return false;
+	}
 }

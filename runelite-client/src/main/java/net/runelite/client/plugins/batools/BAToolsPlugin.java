@@ -25,6 +25,8 @@
  */
 package net.runelite.client.plugins.batools;
 
+import net.runelite.api.Prayer;
+import net.runelite.api.SoundEffectID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
@@ -209,6 +211,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			{
 				log.info("" + tickNum++);
 			}
+		}
+
+		if(config.prayerMetronome() && isAnyPrayerActive())
+		{
+			client.playSoundEffect(SoundEffectID.GE_COIN_TINKLE);
 		}
 	}
 
@@ -638,5 +645,18 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			shiftDown = false;
 		}
+	}
+
+	private boolean isAnyPrayerActive()
+	{
+		for (Prayer pray : Prayer.values())//Check if any prayers are active
+		{
+			if (client.isPrayerActive(pray))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
