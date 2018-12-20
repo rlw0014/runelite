@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,26 +22,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.cache.server;
+package net.runelite.client.plugins.worldhopper.ping;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
-import net.runelite.protocol.update.encoders.XorEncoder;
-import net.runelite.protocol.api.update.EncryptionPacket;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 
-public class EncryptionHandler extends SimpleChannelInboundHandler<EncryptionPacket>
+interface IPHlpAPI extends Library
 {
+	IPHlpAPI INSTANCE = Native.loadLibrary("IPHlpAPI", IPHlpAPI.class);
 
-	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, EncryptionPacket encryptionPacket) throws Exception
-	{
-		ChannelPipeline p = ctx.pipeline();
-		XorEncoder xorEncoder = p.get(XorEncoder.class);
-		if (xorEncoder != null)
-		{
-			xorEncoder.setKey(encryptionPacket.getKey());
-		}
-	}
+	Pointer IcmpCreateFile();
 
+	boolean IcmpCloseHandle(Pointer handle);
+
+	int IcmpSendEcho(Pointer IcmpHandle, int DestinationAddress, Pointer RequestData, short RequestSize, Pointer RequestOptions, IcmpEchoReply ReplyBuffer, int ReplySize, int Timeout);
 }
