@@ -27,7 +27,6 @@ package net.runelite.client.plugins.batools;
 
 import net.runelite.api.Prayer;
 import net.runelite.api.SoundEffectID;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.event.KeyEvent;
@@ -215,7 +214,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		if(config.prayerMetronome() && isAnyPrayerActive())
 		{
-			client.playSoundEffect(SoundEffectID.GE_COIN_TINKLE);
+			client.playSoundEffect(SoundEffectID.GE_INCREMENT_PLOP);
 		}
 	}
 

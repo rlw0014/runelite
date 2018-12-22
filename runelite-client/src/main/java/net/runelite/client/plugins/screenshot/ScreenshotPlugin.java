@@ -64,6 +64,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.LocalPlayerDeath;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import static net.runelite.api.widgets.WidgetID.BARROWS_REWARD_GROUP_ID;
@@ -342,6 +343,11 @@ public class ScreenshotPlugin extends Plugin
 				theatreOfBloodNumber = Integer.valueOf(m.group());
 				return;
 			}
+		}
+
+		if (chatMessage.startsWith("<col=ef1020>Wave: ") && config.infernoScout())
+		{
+			takeScreenshot("fernoscout " + format(new Date()));
 		}
 
 		if (config.screenshotPet() && PET_MESSAGES.stream().anyMatch(chatMessage::contains))
