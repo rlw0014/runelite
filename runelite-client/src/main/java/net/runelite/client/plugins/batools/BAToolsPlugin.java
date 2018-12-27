@@ -214,7 +214,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		if(config.prayerMetronome() && isAnyPrayerActive())
 		{
-			client.playSoundEffect(SoundEffectID.GE_INCREMENT_PLOP);
+			for(int i = 0; i < config.prayerMetronomeVolume(); i++)
+			{
+				client.playSoundEffect(SoundEffectID.GE_INCREMENT_PLOP);
+			}
 		}
 	}
 

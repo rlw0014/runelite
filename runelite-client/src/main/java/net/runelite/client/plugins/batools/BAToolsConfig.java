@@ -131,4 +131,14 @@ public interface BAToolsConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "prayerMetronomeVolume",
+		name = "Prayer Metronome Volume",
+		description = "asd"
+	)
+	default int prayerMetronomeVolume()
+	{
+		return 1;
+	}
 }
