@@ -141,4 +141,15 @@ public interface BAToolsConfig extends Config
 	{
 		return 1;
 	}
+
+	@ConfigItem(
+		keyName = "attackStyles",
+		name = "Attack Styles",
+		description = "asd"
+	)
+	default boolean attackStyles()
+	{
+		return false;
+	}
+
 }

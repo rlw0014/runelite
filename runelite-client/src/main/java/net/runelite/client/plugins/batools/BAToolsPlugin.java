@@ -25,8 +25,11 @@
  */
 package net.runelite.client.plugins.batools;
 
+import net.runelite.api.Item;
 import net.runelite.api.Prayer;
 import net.runelite.api.SoundEffectID;
+import net.runelite.api.Tile;
+import net.runelite.api.kit.KitType;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.event.KeyEvent;
@@ -61,6 +64,7 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
@@ -210,6 +214,68 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			{
 				log.info("" + tickNum++);
 			}
+		}
+
+		Widget weapon = client.getWidget(593, 1);
+
+		if(weapon!=null
+			&& inGameBit == 1
+			&& weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws")
+			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT)!=null)
+		{
+			String style = client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT).getText();
+
+			if(style.contains("Defensive"))
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			}
+			else if(style.contains("Aggressive"))
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
+			}
+			else if(style.contains("Controlled"))
+			{
+				if(weapon.getText().contains("Crystal halberd"))
+				{
+					client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+					client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
+				}
+				else
+				{
+					client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
+					client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+				}
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
+			}
+			else if(style.contains("Accurate") && weapon.getText().contains("Dragon claws"))
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
+			}
+			else
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			}
+
+		}
+		else
+		{
+			client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+			client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+			client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+			client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
 		}
 
 		if(config.prayerMetronome() && isAnyPrayerActive())
@@ -428,12 +494,16 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				{
 					correctEgg = entry;
 				}
+				else if (!entry.getOption().startsWith("Take"))
+				{
+					entries.add(entry);
+				}
 			}
 			if (correctEgg != null)
 			{
 				entries.add(correctEgg);
-				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
+			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
 
 		if (client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT) != null && inGameBit == 1 && config.osHelp() && event.getTarget().equals("<col=ffff>Healer item machine") && shiftDown)
@@ -462,6 +532,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
 		}
+
 	}
 
 	@Subscribe
@@ -497,8 +568,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 	}
 
-
-	private void addCounter()
+		private void addCounter()
 	{
 		if (!config.defTimer() || counter != null)
 		{
