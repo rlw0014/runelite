@@ -146,6 +146,8 @@ public class ScreenshotPlugin extends Plugin
 
 	private Integer chambersOfXericNumber;
 
+	private Integer chambersOfXericChallengeNumber;
+
 	private Integer theatreOfBloodNumber;
 
 	private boolean shouldTakeScreenshot;
@@ -348,6 +350,16 @@ public class ScreenshotPlugin extends Plugin
 			}
 		}
 
+		if (chatMessage.startsWith("Your completed Chambers of Xeric Challenge Mode count is:"))
+		{
+			Matcher m = NUMBER_PATTERN.matcher(Text.removeTags(chatMessage));
+			if (m.find())
+			{
+				chambersOfXericChallengeNumber = Integer.valueOf(m.group());
+				return;
+			}
+		}
+
 		if (chatMessage.startsWith("Your completed Theatre of Blood count is:"))
 		{
 			Matcher m = NUMBER_PATTERN.matcher(Text.removeTags(chatMessage));
@@ -459,14 +471,22 @@ public class ScreenshotPlugin extends Plugin
 			}
 			case CHAMBERS_OF_XERIC_REWARD_GROUP_ID:
 			{
-				if (chambersOfXericNumber == null)
+				if (chambersOfXericNumber != null)
+				{
+					fileName = "Chambers of Xeric(" + chambersOfXericNumber + ")";
+					chambersOfXericNumber = null;
+					break;
+				}
+				else if (chambersOfXericChallengeNumber != null)
+				{
+					fileName = "Chambers of Xeric Challenge Mode(" + chambersOfXericChallengeNumber + ")";
+					chambersOfXericChallengeNumber = null;
+					break;
+				}
+				else
 				{
 					return;
 				}
-
-				fileName = "Chambers of Xeric(" + chambersOfXericNumber + ")";
-				chambersOfXericNumber = null;
-				break;
 			}
 			case THEATRE_OF_BLOOD_REWARD_GROUP_ID:
 			{
@@ -724,6 +744,12 @@ public class ScreenshotPlugin extends Plugin
 	int getChambersOfXericNumber()
 	{
 		return chambersOfXericNumber;
+	}
+
+	@VisibleForTesting
+	int getChambersOfXericChallengeNumber()
+	{
+		return chambersOfXericChallengeNumber;
 	}
 
 	@VisibleForTesting
