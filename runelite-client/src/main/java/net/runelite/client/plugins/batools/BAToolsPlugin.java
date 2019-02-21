@@ -209,7 +209,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			{
 				addCounter();
 			}
-			counter.setText(String.valueOf(tickNum));
+			counter.setCount(tickNum);
 			if (config.defTimer())
 			{
 				log.info("" + tickNum++);
@@ -218,7 +218,8 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		Widget weapon = client.getWidget(593, 1);
 
-		if(weapon!=null
+		if(config.attackStyles()
+			&& weapon!=null
 			&& inGameBit == 1
 			&& weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws")
 			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT)!=null)
@@ -568,7 +569,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 	}
 
-		private void addCounter()
+	private void addCounter()
 	{
 		if (!config.defTimer() || counter != null)
 		{
