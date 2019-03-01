@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
- * Copyright (c) 2018, Ron Young <https://github.com/raiyni>
+ * Copyright (c) 2018 Sebastiaan <https://github.com/SebastiaanVanspauwen>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,37 +22,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.banktags.tabs;
+package net.runelite.client.plugins.clanchat;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import net.runelite.api.widgets.Widget;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import net.runelite.client.ui.overlay.infobox.Counter;
 
-@Data
-@EqualsAndHashCode(of = "tag")
-class TagTab
+class ClanChatIndicator extends Counter
 {
-	private String tag;
-	private int iconItemId;
-	private Widget background;
-	private Widget icon;
+	private final ClanChatPlugin plugin;
 
-	TagTab(int iconItemId, String tag)
+	ClanChatIndicator(BufferedImage image, ClanChatPlugin plugin)
 	{
-		this.iconItemId = iconItemId;
-		this.tag = tag;
+		super(image, plugin, plugin.getClanAmount());
+		this.plugin = plugin;
 	}
 
-	void setHidden(boolean hide)
+	@Override
+	public int getCount()
 	{
-		if (background != null)
-		{
-			background.setHidden(hide);
-		}
+		return plugin.getClanAmount();
+	}
 
-		if (icon != null)
-		{
-			icon.setHidden(hide);
-		}
+	@Override
+	public String getTooltip()
+	{
+		return plugin.getClanAmount() + " clan member(s) near you";
+	}
+
+	@Override
+	public Color getTextColor()
+	{
+		return Color.WHITE;
 	}
 }
