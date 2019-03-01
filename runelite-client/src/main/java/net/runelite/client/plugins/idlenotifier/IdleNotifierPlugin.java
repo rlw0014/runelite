@@ -47,6 +47,7 @@ import net.runelite.api.Varbits;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.GraphicChanged;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.client.Notifier;
@@ -143,6 +144,7 @@ public class IdleNotifierPlugin extends Plugin
 			case GEM_CUTTING_EMERALD:
 			case GEM_CUTTING_RUBY:
 			case GEM_CUTTING_DIAMOND:
+			case GEM_CUTTING_AMETHYST:
 			case CRAFTING_GLASSBLOWING:
 			case CRAFTING_SPINNING:
 			case CRAFTING_BATTLESTAVES:
@@ -195,17 +197,21 @@ public class IdleNotifierPlugin extends Plugin
 			case MINING_MOTHERLODE_INFERNAL:
 			case MINING_MOTHERLODE_3A:
 			/* Herblore */
+			case HERBLORE_PESTLE_AND_MORTAR:
 			case HERBLORE_POTIONMAKING:
 			case HERBLORE_MAKE_TAR:
 			/* Magic */
 			case MAGIC_CHARGING_ORBS:
 			case MAGIC_LUNAR_STRING_JEWELRY:
 			case MAGIC_MAKE_TABLET:
+			case MAGIC_ENCHANTING_JEWELRY:
 			/* Prayer */
 			case USING_GILDED_ALTAR:
 			/* Farming */
 			case FARMING_MIX_ULTRACOMPOST:
 			/* Misc */
+			case PISCARILIUS_CRANE_REPAIR:
+			case HOME_MAKE_TABLET:
 			case SAND_COLLECTION:
 				resetTimers();
 				lastAnimation = animation;
@@ -327,6 +333,22 @@ public class IdleNotifierPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onGraphicChanged(GraphicChanged event)
+	{
+		Actor actor = event.getActor();
+
+		if (actor != client.getLocalPlayer())
+		{
+			return;
+		}
+
+		if (actor.getGraphic() == GraphicID.SPLASH)
+		{
+			lastCombatCountdown = HIGHEST_MONSTER_ATTACK_SPEED;
+		}
+	}
+
+	@Subscribe
 	public void onGameTick(GameTick event)
 	{
 		final Player local = client.getLocalPlayer();
@@ -387,7 +409,7 @@ public class IdleNotifierPlugin extends Plugin
 
 		if (checkFullSpecEnergy())
 		{
-			notifier.notify("[" + local.getName() + "] has restored spec energy!");;
+			notifier.notify("[" + local.getName() + "] has restored spec energy!");
 		}
 	}
 

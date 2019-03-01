@@ -320,7 +320,6 @@ public class ClientUI
 				() ->
 				{
 					saveClientBoundsConfig();
-					configManager.sendConfig();
 					runelite.shutdown();
 				},
 				this::showWarningOnExit
@@ -543,6 +542,7 @@ public class ClientUI
 	 */
 	public void paint(final Graphics graphics)
 	{
+		assert SwingUtilities.isEventDispatchThread() : "paint must be called on EDT";
 		frame.paint(graphics);
 	}
 
