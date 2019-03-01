@@ -64,6 +64,7 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.events.WidgetHiddenChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
@@ -164,57 +165,8 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	}
 
 	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
+	public void onWidgetHiddenChanged(WidgetHiddenChanged event)
 	{
-		switch (event.getGroupId())
-		{
-			case WidgetID.BA_REWARD_GROUP_ID:
-			{
-				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-
-				if (rewardWidget != null && rewardWidget.getText().contains("<br>5"))
-				{
-					tickNum = 0;
-				}
-			}
-		}
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick event)
-	{
-		if (config.antiDrag())
-		{
-			client.setInventoryDragDelay(config.antiDragDelay());
-		}
-
-		Widget callWidget = getWidget();
-
-		if (callWidget != null)
-		{
-			if (callWidget.getTextColor() != pastCall && callWidget.getTextColor() == 16316664)
-			{
-				tickNum = 0;
-			}
-			pastCall = callWidget.getTextColor();
-		}
-		if (inGameBit == 1)
-		{
-			if (tickNum > 9)
-			{
-				tickNum = 0;
-			}
-			if (counter == null)
-			{
-				addCounter();
-			}
-			counter.setCount(tickNum);
-			if (config.defTimer())
-			{
-				log.info("" + tickNum++);
-			}
-		}
-
 		Widget weapon = client.getWidget(593, 1);
 
 		if(config.attackStyles()
@@ -276,6 +228,59 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
 			client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
 			client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		switch (event.getGroupId())
+		{
+			case WidgetID.BA_REWARD_GROUP_ID:
+			{
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+
+				if (rewardWidget != null && rewardWidget.getText().contains("<br>5"))
+				{
+					tickNum = 0;
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		if (config.antiDrag())
+		{
+			client.setInventoryDragDelay(config.antiDragDelay());
+		}
+
+		Widget callWidget = getWidget();
+
+		if (callWidget != null)
+		{
+			if (callWidget.getTextColor() != pastCall && callWidget.getTextColor() == 16316664)
+			{
+				tickNum = 0;
+			}
+			pastCall = callWidget.getTextColor();
+		}
+		if (inGameBit == 1)
+		{
+			if (tickNum > 9)
+			{
+				tickNum = 0;
+			}
+			if (counter == null)
+			{
+				addCounter();
+			}
+			counter.setCount(tickNum);
+			if (config.defTimer())
+			{
+				log.info("" + tickNum++);
+			}
 		}
 
 		if(config.prayerMetronome() && isAnyPrayerActive())
