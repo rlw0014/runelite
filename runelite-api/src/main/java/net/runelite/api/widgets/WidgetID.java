@@ -568,7 +568,7 @@ public class WidgetID
 
 	static class Raids
 	{
-		static final int POINTS_INFOBOX = 3;
+		static final int POINTS_INFOBOX = 6;
 	}
 	
 	static class ExperienceDrop
