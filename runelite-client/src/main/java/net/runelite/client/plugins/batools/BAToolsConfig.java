@@ -152,4 +152,14 @@ public interface BAToolsConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+		keyName = "tagging",
+		name = "Attack Tags",
+		description = "asd"
+	)
+	default boolean tagging()
+	{
+		return false;
+	}
+
 }

@@ -172,7 +172,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		if(config.attackStyles()
 			&& weapon!=null
 			&& inGameBit == 1
-			&& weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws")
+			&& (weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws"))
 			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT)!=null)
 		{
 			String style = client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT).getText();
@@ -224,10 +224,22 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 		else
 		{
-			client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
-			client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
-			client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
-			client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_ONE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_TWO)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_THREE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			}
 		}
 	}
 
@@ -461,7 +473,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			swap("quick-start", option, target, true);
 		}
 
-		if (inGameBit == 1 && config.healerMenuOption() && event.getTarget().contains("Penance Healer"))
+		if ((event.getTarget().contains("Penance Healer") || event.getTarget().contains("Penance Fighter") || event.getTarget().contains("Penance Ranger")))
 		{
 
 			MenuEntry[] menuEntries = client.getMenuEntries();
@@ -511,6 +523,22 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
 
+		if (client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null && inGameBit == 1 && config.attackStyles() && shiftDown)
+		{
+			MenuEntry[] menuEntries = client.getMenuEntries();
+			MenuEntry correctEgg = null;
+			entries.clear();
+
+			for (MenuEntry entry : menuEntries)
+			{
+				if (entry.getOption().contains("Walk here"))
+				{
+					entries.add(entry);
+				}
+			}
+			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+		}
+
 		if (client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT) != null && inGameBit == 1 && config.osHelp() && event.getTarget().equals("<col=ffff>Healer item machine") && shiftDown)
 		{
 			String[] currentCall = client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT).getText().split(" ");
@@ -543,25 +571,26 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (!config.healerMenuOption() || !event.getMenuTarget().contains("Penance Healer") || client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT) == null)
+		if(config.tagging() && (event.getMenuTarget().contains("Penance Ranger") || event.getMenuTarget().contains("Penance Fighter")))
 		{
-			return;
+			String target = event.getMenuTarget();
+			if (event.getMenuOption().contains("Attack"))
+			{
+				foodPressed.put(event.getId(), Instant.now());
+			}
+			log.info(target);
 		}
 
-		String currentCall = client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT).getText();
-		String target = event.getMenuTarget();
-
-		if ((currentCall.equals("Pois. Worms") && (target.contains("Poisoned worms") && target.contains("->") && target.contains("Penance Healer")))
-			|| (currentCall.equals("Pois. Meat") && (target.contains("Poisoned meat") && target.contains("->") && target.contains("Penance Healer")))
-			|| (currentCall.equals("Pois. Tofu") && (target.contains("Poisoned tofu") && target.contains("->") && target.contains("Penance Healer"))))
+		if (config.healerMenuOption() && event.getMenuTarget().contains("Penance Healer"))
 		{
-			foodPressed.put(event.getId(), Instant.now());
+			String target = event.getMenuTarget();
+			if (target.contains("->"))
+			{
+				foodPressed.put(event.getId(), Instant.now());
+			}
 		}
 
-		if (target.contains("->") && target.contains("Penance Healer"))
-		{
-			foodPressed.put(event.getId(), Instant.now());
-		}
+
 	}
 
 	@Subscribe
