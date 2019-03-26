@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018, Cameron <https://github.com/noremac201>
+ * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +29,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup(
-	keyName = "barbarianAssault",
-	name = "Barbarian Assault",
-	description = "Configuration for the barbarian assault plugin"
-)
+@ConfigGroup("barbarianAssault")
 public interface BarbarianAssaultConfig extends Config
 {
 	@ConfigItem(
@@ -44,4 +41,21 @@ public interface BarbarianAssaultConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "waveTimes",
+		name = "Show wave and game duration",
+		description = "Displays wave and game duration"
+	)
+	default boolean waveTimes()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "showEggCount",
+		name = "Show count of eggs collected as collector.",
+		description = "Display egg count as collector"
+	)
+	default boolean showEggCount() { return false; }
 }
