@@ -27,7 +27,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @PluginDescriptor(
-		name = "CC Update"
+		name = " Queue Helper",
+		description = "Ba Services' Queue Helper created by Ryan"
 )
 @Slf4j
 public class ccUpdatePlugin extends Plugin
