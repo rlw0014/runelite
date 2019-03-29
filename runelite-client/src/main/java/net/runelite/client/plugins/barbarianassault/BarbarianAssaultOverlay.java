@@ -82,14 +82,7 @@ class BarbarianAssaultOverlay extends Overlay
 
 		if (config.showTimer() && roleText != null && roleSprite != null)
 		{
-			if (config.showEggCount() && role.equals(Role.COLLECTOR))
-			{
-				roleText.setText(String.format("(%d) 00:%02d", plugin.getCollectedEggCount(), currentRound.getTimeToChange()));
-			}
-			else
-			{
-				roleText.setText(String.format("00:%02d", currentRound.getTimeToChange()));
-			}
+			roleText.setText(String.format("00:%02d", currentRound.getTimeToChange()));
 			Rectangle spriteBounds = roleSprite.getBounds();
 			roleSprite.setHidden(true);
 			graphics.drawImage(plugin.getClockImage(), spriteBounds.x, spriteBounds.y, null);

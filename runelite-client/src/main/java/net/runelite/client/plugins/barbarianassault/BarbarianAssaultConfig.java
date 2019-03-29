@@ -51,11 +51,4 @@ public interface BarbarianAssaultConfig extends Config
 	{
 		return true;
 	}
-
-	@ConfigItem(
-		keyName = "showEggCount",
-		name = "Show count of eggs collected as collector.",
-		description = "Display egg count as collector"
-	)
-	default boolean showEggCount() { return false; }
 }
