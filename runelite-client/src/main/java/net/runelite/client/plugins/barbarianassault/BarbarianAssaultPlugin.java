@@ -136,7 +136,6 @@ public class BarbarianAssaultPlugin extends Plugin {
 					totalMsg = "; Total Collected: ";
 					total = ""+totalCollectedEggCount;
 				}
-
 				announceTime("Game finished, duration: ", gameTime.getTime(false),type, amt, totalMsg, total);
 			}
 		}
@@ -153,6 +152,8 @@ public class BarbarianAssaultPlugin extends Plugin {
 
 			if (currentWave.equals(START_WAVE)) {
 				gameTime = new GameTimer();
+				totalHpHealed = 0;
+				totalCollectedEggCount = 0;
 			} else if (gameTime != null) {
 				gameTime.setWaveStartTime();
 			}
@@ -201,6 +202,8 @@ public class BarbarianAssaultPlugin extends Plugin {
 				overlay.setCurrentRound(null);
 
 				if (config.waveTimes() && gameTime != null) {
+					totalCollectedEggCount += collectedEggCount;
+					totalHpHealed += HpHealed;
 					if (config.showHpCount() && HpHealed > 0) {
 						amt = "" + HpHealed;
 						type = "; Healed: ";
@@ -240,8 +243,7 @@ public class BarbarianAssaultPlugin extends Plugin {
 	}
 
 	private void announceTime(String preText, String time, String type, String amt, String totalMsg, String total) {
-		totalCollectedEggCount += collectedEggCount;
-		totalHpHealed += HpHealed;
+
 
 		final String chatMessage = new ChatMessageBuilder()
 				.append(ChatColorType.NORMAL)
