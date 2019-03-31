@@ -1,10 +1,9 @@
 package net.runelite.client.plugins.ccupdate;
 
 import com.google.common.collect.Sets;
-import com.google.common.eventbus.Subscribe;
+import net.runelite.client.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ClanMember;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
@@ -30,7 +29,6 @@ import java.util.Set;
 		name = " Queue Helper",
 		description = "Ba Services' Queue Helper created by Ryan"
 )
-@Slf4j
 public class ccUpdatePlugin extends Plugin
 {
 	public static final MediaType JSON  = MediaType.parse("application/json; charset=utf-8");
@@ -94,14 +92,14 @@ public class ccUpdatePlugin extends Plugin
 			@Override
 			public void onFailure(Call call, IOException ex)
 			{
-				log.warn("error posting clan member update", ex);
+				//log.warn("error posting clan member update", ex);
 			}
 
 			@Override
 			public void onResponse(Call call, Response response) throws IOException
 			{
 				response.body().close();
-				log.debug("request update for clan chat members");
+				//log.debug("request update for clan chat members");
 			}
 		});
 	}
