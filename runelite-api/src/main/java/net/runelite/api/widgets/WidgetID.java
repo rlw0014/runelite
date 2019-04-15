@@ -128,6 +128,7 @@ public class WidgetID
 	public static final int QUESTLIST_GROUP_ID = 399;
 	public static final int SKILLS_GROUP_ID = 320;
 	public static final int QUESTTAB_GROUP_ID = 629;
+	public static final int MUSIC_GROUP_ID = 239;
 
 	static class WorldMap
 	{
@@ -553,7 +554,7 @@ public class WidgetID
 		static final int CURRENT_WAVE_WIDGET = 4;
 		static final int CURRENT_WAVE = 5;
 		static final int CALL_WIDGET = 6;
-		static final int CALL_TEXT = 7;
+		static final int HEARD_CALL = 7;
 		static final int TO_CALL_WIDGET = 8;
 		static final int TO_CALL = 9;
 		static final int ROLE_SPRITE = 10;
@@ -763,5 +764,11 @@ public class WidgetID
 	static class QuestTab
 	{
 		static final int QUEST_TAB = 3;
+	}
+
+	static class Music
+	{
+		static final int CONTAINER = 0;
+		static final int LIST = 3;
 	}
 }

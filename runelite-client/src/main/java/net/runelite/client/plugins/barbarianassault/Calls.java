@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Lotto <https://github.com/devLotto>
+ * Copyright (c) 2018, Cameron <https://github.com/noremac201>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,45 +22,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.cluescrolls;
+package net.runelite.client.plugins.barbarianassault;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import javax.inject.Inject;
-import net.runelite.client.plugins.cluescrolls.clues.ClueScroll;
-import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ClueScrollWorldOverlay extends Overlay
-{
-	public static final int IMAGE_Z_OFFSET = 30;
+public enum Calls
+{   //Attacker Calls
+	RED_EGG("Red egg", "Tell-red"),
+	GREEN_EGG("Green egg", "Tell-green"),
+	BLUE_EGG("Blue egg", "Tell-blue"),
+	//Collector Calls
+	CONTROLLED("Controlled/Bullet/Wind", "Tell-controlled"),
+	ACCURATE("Accurate/Field/Water", "Tell-accurate"),
+	AGGRESSIVE("Aggressive/Blunt/Earth", "Tell-aggressive"),
+	DEFENSIVE("Defensive/Barbed/Fire", "Tell-defensive"),
+	//Healer Calls
+	TOFU("Tofu", "Tell-tofu"),
+	CRACKERS("Crackers", "Tell-crackers"),
+	WORMS("Worms", "Tell-worms"),
+	//Defender Calls
+	POIS_WORMS("Pois. Worms", "Tell-worms"),
+	POIS_TOFU("Pois. Tofu", "Tell-tofu"),
+	POIS_MEAT("Pois. Meat", "Tell-meat");
 
-	public static final Color CLICKBOX_BORDER_COLOR = Color.ORANGE;
-	public static final Color CLICKBOX_HOVER_BORDER_COLOR = CLICKBOX_BORDER_COLOR.darker();
-	public static final Color CLICKBOX_FILL_COLOR = new Color(0, 255, 0, 20);
+	private final String call;
+	private final String option;
 
-	private final ClueScrollPlugin plugin;
+	private static final Map<String, String> CALL_MENU = new HashMap<>();
 
-	@Inject
-	private ClueScrollWorldOverlay(ClueScrollPlugin plugin)
+	static
 	{
-		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ABOVE_SCENE);
-		this.plugin = plugin;
-	}
-
-	@Override
-	public Dimension render(Graphics2D graphics)
-	{
-		ClueScroll clue = plugin.getClue();
-
-		if (clue != null)
+		for (Calls s : values())
 		{
-			clue.makeWorldOverlayHint(graphics, plugin);
+			CALL_MENU.put(s.getCall(), s.getOption());
 		}
-
-		return null;
 	}
+
+	Calls(String call, String option)
+	{
+		this.call = call;
+		this.option = option;
+	}
+
+	public String getCall()
+	{
+		return call;
+	}
+
+	public String getOption()
+	{
+		return option;
+	}
+
+	public static String getOption(String call)
+	{
+		return CALL_MENU.get(call);
+	}
+
 }
