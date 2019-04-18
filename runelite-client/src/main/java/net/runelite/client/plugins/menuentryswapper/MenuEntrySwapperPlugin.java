@@ -472,7 +472,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 				client.setMenuEntries(entries);
 			}
 		}
-		else if (config.swapConstruction() && target.equals("table hotspot") && option.equals("examine"))
+		else if (config.swapConstruction() && target.equals("table space") && option.equals("examine"))
 		{
 			MenuEntry[] entries = client.getMenuEntries();
 			int idx = searchIndex(entries, "build", target, true);
