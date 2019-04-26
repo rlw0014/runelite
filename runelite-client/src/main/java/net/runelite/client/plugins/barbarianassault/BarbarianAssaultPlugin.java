@@ -81,7 +81,7 @@ public class BarbarianAssaultPlugin extends Plugin
 
 	private boolean hasAnnounced;
 
-	private ArrayList<Integer> widgetsTextList = new ArrayList<Integer>();
+	private ArrayList<Integer> widgetsTextList = new ArrayList<>();
 
 	String[] descriptions = {"Runners: ",
 			"Hitpoints: ",
@@ -218,6 +218,7 @@ public class BarbarianAssaultPlugin extends Plugin
 				gameTime = new GameTimer();
 				totalHpHealed = 0;
 				totalCollectedEggCount = 0;
+				widgetsTextList = null;
 			}
 			else if (gameTime != null)
 			{
@@ -452,6 +453,10 @@ public class BarbarianAssaultPlugin extends Plugin
 		for (int i = startingIndex; i < widgetsTextList.size(); i+=6)
 		{
 			total += widgetsTextList.get(i);
+		}
+		if (startingIndex == 5)
+		{
+			total += 80;
 		}
 		return total;
 	}
