@@ -47,11 +47,11 @@ class Wave
     private int[] otherRolesPointsList = new int[4];
     private String[] descriptions = {
             " A: ",
-            " D: ",
-            " C: ",
-            " Vial: ",
-            " H packs: ",
-            " Total: "};
+            "; D: ",
+            "; C: ",
+            "; Vial: ",
+            "; H packs: ",
+            "; Total: "};
 
     private String[] otherPointsDescriptions = {
             " A: ",
@@ -182,6 +182,10 @@ class Wave
                 if (importantPointsList[i] < 0)
                 {
                     message.append(Color.RED, String.valueOf(importantPointsList[i]));
+                }
+                else if (importantPointsList[i] > 0)
+                {
+                    message.append(Color.BLUE, String.valueOf(importantPointsList[i]));
                 }
                 else
                 {
