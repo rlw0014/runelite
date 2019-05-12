@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2018, Joris K <kjorisje@gmail.com>
- * Copyright (c) 2018, Lasse <cronick@zytex.dk>
+ * Copyright (c) 2019, Stephen <stepzhu@umich.edu>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,34 +22,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.cooking;
+package net.runelite.client.plugins.smelting;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("cooking")
-public interface CookingConfig extends Config
+@ConfigGroup("smelting")
+public interface SmeltingConfig extends Config
 {
 	@ConfigItem(
 		position = 1,
 		keyName = "statTimeout",
 		name = "Reset stats (minutes)",
-		description = "Configures the time until the session resets and the overlay is hidden (0 = Disable feature)"
+		description = "The time it takes for the current smelting session to be reset"
 	)
 	default int statTimeout()
 	{
 		return 5;
-	}
-
-	@ConfigItem(
-		position = 2,
-		keyName = "fermentTimer",
-		name = "Show wine fermenting timer",
-		description = "Conifgures if the timer before wines are fermented is shown."
-	)
-	default boolean fermentTimer()
-	{
-		return true;
 	}
 }
