@@ -95,7 +95,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	private final List<MenuEntry> entries = new ArrayList<>();
 	private HashMap<Integer, Instant> foodPressed = new HashMap<>();
 	private CycleCounter counter;
-	private Actor lastInteracted;
 
 	private boolean shiftDown;
 
@@ -124,9 +123,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	private BAToolsOverlay overlay;
 
 	@Getter
-	private Map<NPC, Healer> healers;
-
-	@Getter
 	private Instant wave_start;
 
 	@Inject
@@ -143,9 +139,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlay);
-		healers = new HashMap<>();
 		wave_start = Instant.now();
-		lastInteracted = null;
 		foodPressed.clear();
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
@@ -155,9 +149,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	protected void shutDown() throws Exception
 	{
 		removeCounter();
-		healers.clear();
 		inGameBit = 0;
-		lastInteracted = null;
 		overlayManager.remove(overlay);
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
@@ -356,77 +348,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			String[] message = event.getMessage().split(" ");
 			currentWave = Integer.parseInt(message[BA_WAVE_NUM_INDEX]);
 			wave_start = Instant.now();
-			healers.clear();
 		}
-	}
-
-	@Subscribe
-	public void onNpcSpawned(NpcSpawned event)
-	{
-		NPC npc = event.getNpc();
-
-		if (isNpcHealer(npc.getId()))
-		{
-			if (checkNewSpawn(npc) || Duration.between(wave_start, Instant.now()).getSeconds() < 16)
-			{
-				int spawnNumber = healers.size();
-				healers.put(npc, new Healer(npc, spawnNumber, currentWave));
-				log.info("spawn number: " + spawnNumber + " on wave " + currentWave);
-			}
-		}
-	}
-
-	@Subscribe
-	public void onHitsplatApplied(HitsplatApplied hitsplatApplied)
-	{
-		Actor actor = hitsplatApplied.getActor();
-
-		if (healers.isEmpty() && !(actor instanceof NPC) && lastInteracted == null)
-		{
-			return;
-		}
-
-		for (Healer healer : healers.values())
-		{
-			if (healer.getNpc() == actor && actor == lastInteracted)
-			{
-				healer.setFoodRemaining(healer.getFoodRemaining() - 1);
-			}
-		}
-	}
-
-	@Subscribe
-	public void onNpcDespawned(NpcDespawned event)
-	{
-		if (healers.remove(event.getNpc()) != null && healers.isEmpty())
-		{
-			healers.clear();
-		}
-	}
-
-	@Subscribe
-	public void onInteractingChanged(InteractingChanged event)
-	{
-		Actor opponent = event.getTarget();
-
-		if (opponent != null && opponent instanceof NPC && isNpcHealer(((NPC) opponent).getId()) && event.getSource() != client.getLocalPlayer())
-		{
-			lastInteracted = opponent;
-		}
-	}
-
-	public static boolean isNpcHealer(int npcId)
-	{
-		return npcId == NpcID.PENANCE_HEALER ||
-			npcId == NpcID.PENANCE_HEALER_5766 ||
-			npcId == NpcID.PENANCE_HEALER_5767 ||
-			npcId == NpcID.PENANCE_HEALER_5768 ||
-			npcId == NpcID.PENANCE_HEALER_5769 ||
-			npcId == NpcID.PENANCE_HEALER_5770 ||
-			npcId == NpcID.PENANCE_HEALER_5771 ||
-			npcId == NpcID.PENANCE_HEALER_5772 ||
-			npcId == NpcID.PENANCE_HEALER_5773 ||
-			npcId == NpcID.PENANCE_HEALER_5774;
 	}
 
 	@Subscribe
@@ -589,8 +511,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				foodPressed.put(event.getId(), Instant.now());
 			}
 		}
-
-
 	}
 
 	@Subscribe
@@ -670,64 +590,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		return -1;
-	}
-
-	private static WorldPoint rotate(WorldPoint point, int rotation)
-	{
-		int chunkX = point.getX() & ~(CHUNK_SIZE - 1);
-		int chunkY = point.getY() & ~(CHUNK_SIZE - 1);
-		int x = point.getX() & (CHUNK_SIZE - 1);
-		int y = point.getY() & (CHUNK_SIZE - 1);
-		switch (rotation)
-		{
-			case 1:
-				return new WorldPoint(chunkX + y, chunkY + (CHUNK_SIZE - 1 - x), point.getPlane());
-			case 2:
-				return new WorldPoint(chunkX + (CHUNK_SIZE - 1 - x), chunkY + (CHUNK_SIZE - 1 - y), point.getPlane());
-			case 3:
-				return new WorldPoint(chunkX + (CHUNK_SIZE - 1 - y), chunkY + x, point.getPlane());
-		}
-		return point;
-	}
-
-	private boolean checkNewSpawn(NPC npc)
-	{
-		int regionId = 7509;
-		int regionX = 42;
-		int regionY = 46;
-		int z = 0;
-
-		// world point of the tile marker
-		WorldPoint worldPoint = new WorldPoint(
-			((regionId >>> 8) << 6) + regionX,
-			((regionId & 0xff) << 6) + regionY,
-			z
-		);
-
-		int[][][] instanceTemplateChunks = client.getInstanceTemplateChunks();
-		for (int x = 0; x < instanceTemplateChunks[z].length; ++x)
-		{
-			for (int y = 0; y < instanceTemplateChunks[z][x].length; ++y)
-			{
-				int chunkData = instanceTemplateChunks[z][x][y];
-				int rotation = chunkData >> 1 & 0x3;
-				int templateChunkY = (chunkData >> 3 & 0x7FF) * CHUNK_SIZE;
-				int templateChunkX = (chunkData >> 14 & 0x3FF) * CHUNK_SIZE;
-				if (worldPoint.getX() >= templateChunkX && worldPoint.getX() < templateChunkX + CHUNK_SIZE
-					&& worldPoint.getY() >= templateChunkY && worldPoint.getY() < templateChunkY + CHUNK_SIZE)
-				{
-					WorldPoint p = new WorldPoint(client.getBaseX() + x * CHUNK_SIZE + (worldPoint.getX() & (CHUNK_SIZE - 1)),
-						client.getBaseY() + y * CHUNK_SIZE + (worldPoint.getY() & (CHUNK_SIZE - 1)),
-						worldPoint.getPlane());
-					p = rotate(p, rotation);
-					if (p.distanceTo(npc.getWorldLocation()) < 5)
-					{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
