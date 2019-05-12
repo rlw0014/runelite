@@ -49,6 +49,7 @@ import static net.runelite.api.MenuAction.WALK;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MessageNode;
 import net.runelite.api.NPC;
+import net.runelite.api.NpcID;
 import net.runelite.api.Prayer;
 import net.runelite.api.SoundEffectID;
 import net.runelite.api.Varbits;
@@ -56,8 +57,12 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ConfigChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.HitsplatApplied;
+import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetHiddenChanged;
 import net.runelite.api.events.WidgetLoaded;
@@ -74,7 +79,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
-import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -153,14 +157,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		overlayManager.add(overlay);
 		healers = new HashMap<>();
 		wave_start = Instant.now();
+		lastInteracted = null;
 		foodPressed.clear();
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
-		lastHealer = 0;
-		fighterImage = ImageUtil.getResourceStreamFromClass(getClass(), "fighter.png");
-		rangerImage = ImageUtil.getResourceStreamFromClass(getClass(), "ranger.png");
-		runnerImage = ImageUtil.getResourceStreamFromClass(getClass(), "runner.png");
-		healerImage = ImageUtil.getResourceStreamFromClass(getClass(), "healer.png");
 	}
 
 	@Override
@@ -171,29 +171,9 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		inGameBit = 0;
 		lastInteracted = null;
 		overlayManager.remove(overlay);
-		inGameBit = 0;
-		gameTime = null;
-		currentWave = START_WAVE;
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
 		shiftDown = false;
-	}
-
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
-	{
-		switch (event.getGroupId())
-		{
-			case WidgetID.BA_REWARD_GROUP_ID:
-			{
-				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-
-				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
-				{
-					gameTime = null;
-				}
-			}
-		}
 	}
 
 	@Subscribe
@@ -201,31 +181,31 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	{
 		Widget weapon = client.getWidget(593, 1);
 
-		if (config.attackStyles()
-			&& weapon != null
+		if(config.attackStyles()
+			&& weapon!=null
 			&& inGameBit == 1
 			&& (weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws"))
-			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null)
+			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT)!=null)
 		{
 			String style = client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT).getText();
 
-			if (style.contains("Defensive"))
+			if(style.contains("Defensive"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
 			}
-			else if (style.contains("Aggressive"))
+			else if(style.contains("Aggressive"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
 			}
-			else if (style.contains("Controlled"))
+			else if(style.contains("Controlled"))
 			{
-				if (weapon.getText().contains("Crystal halberd"))
+				if(weapon.getText().contains("Crystal halberd"))
 				{
 					client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
 					client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
@@ -238,7 +218,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
 			}
-			else if (style.contains("Accurate") && weapon.getText().contains("Dragon claws"))
+			else if(style.contains("Accurate") && weapon.getText().contains("Dragon claws"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
@@ -253,6 +233,42 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
 			}
 
+		}
+		else
+		{
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_ONE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_TWO)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_THREE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		switch (event.getGroupId())
+		{
+			case WidgetID.BA_REWARD_GROUP_ID:
+			{
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+
+				if (rewardWidget != null && rewardWidget.getText().contains("<br>5"))
+				{
+					tickNum = 0;
+				}
+			}
 		}
 	}
 
@@ -333,11 +349,80 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			else
 			{
 				addCounter();
-				lastHealer = 0;
 			}
 		}
 
 		inGameBit = inGame;
+	}
+
+	@Subscribe
+	public void onNpcSpawned(NpcSpawned event)
+	{
+		NPC npc = event.getNpc();
+
+		if (isNpcHealer(npc.getId()))
+		{
+			if (checkNewSpawn(npc) || Duration.between(wave_start, Instant.now()).getSeconds() < 16)
+			{
+				int currentWaveInt = Integer.parseInt(currentWave);
+				int spawnNumber = healers.size();
+				healers.put(npc, new Healer(npc, spawnNumber, currentWaveInt));
+				log.info("spawn number: " + spawnNumber + " on wave " + currentWave);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onHitsplatApplied(HitsplatApplied hitsplatApplied)
+	{
+		Actor actor = hitsplatApplied.getActor();
+
+		if (healers.isEmpty() && !(actor instanceof NPC) && lastInteracted == null)
+		{
+			return;
+		}
+
+		for (Healer healer : healers.values())
+		{
+			if (healer.getNpc() == actor && actor == lastInteracted)
+			{
+				healer.setFoodRemaining(healer.getFoodRemaining() - 1);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned event)
+	{
+		if (healers.remove(event.getNpc()) != null && healers.isEmpty())
+		{
+			healers.clear();
+		}
+	}
+
+	@Subscribe
+	public void onInteractingChanged(InteractingChanged event)
+	{
+		Actor opponent = event.getTarget();
+
+		if (opponent != null && opponent instanceof NPC && isNpcHealer(((NPC) opponent).getId()) && event.getSource() != client.getLocalPlayer())
+		{
+			lastInteracted = opponent;
+		}
+	}
+
+	public static boolean isNpcHealer(int npcId)
+	{
+		return npcId == NpcID.PENANCE_HEALER ||
+			npcId == NpcID.PENANCE_HEALER_5766 ||
+			npcId == NpcID.PENANCE_HEALER_5767 ||
+			npcId == NpcID.PENANCE_HEALER_5768 ||
+			npcId == NpcID.PENANCE_HEALER_5769 ||
+			npcId == NpcID.PENANCE_HEALER_5770 ||
+			npcId == NpcID.PENANCE_HEALER_5771 ||
+			npcId == NpcID.PENANCE_HEALER_5772 ||
+			npcId == NpcID.PENANCE_HEALER_5773 ||
+			npcId == NpcID.PENANCE_HEALER_5774;
 	}
 
 	@Subscribe
