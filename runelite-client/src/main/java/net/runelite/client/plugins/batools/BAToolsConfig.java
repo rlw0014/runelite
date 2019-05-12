@@ -63,19 +63,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "healerCodes",
-		name = "Healer Codes",
-		description = "Overlay to show healer codes"
-	)
-	default boolean healerCodes()
-	{
-		return false;
-	}
-
-	@ConfigItem(
 		keyName = "healerMenuOption",
 		name = "Healer menu options",
-		description = "asd"
+		description = "Shows time since last food placed on healer"
 	)
 	default boolean healerMenuOption()
 	{
@@ -95,7 +85,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "antiDragDelay",
 		name = "Anti Drag Delay",
-		description = "asd"
+		description = "Similar to antidrag plugin but does not require shift to be help down"
 	)
 	default int antiDragDelay()
 	{
@@ -115,7 +105,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "osHelp",
 		name = "Shift OS",
-		description = "asd"
+		description = "Hold shift to only pick up correct eggs"
 	)
 	default boolean osHelp()
 	{
@@ -125,7 +115,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "prayerMetronome",
 		name = "Prayer Metronome",
-		description = "asd"
+		description = "Similar to metronome plugin but only activates when a prayer is active"
 	)
 	default boolean prayerMetronome()
 	{
@@ -145,7 +135,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "attackStyles",
 		name = "Attack Styles",
-		description = "asd"
+		description = "Remove incorrect attack styles for hally/claws"
 	)
 	default boolean attackStyles()
 	{
@@ -155,7 +145,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "tagging",
 		name = "Attack Tags",
-		description = "asd"
+		description = "Highlights the menu entry of an attacker/ranger that has not been tagged."
 	)
 	default boolean tagging()
 	{
