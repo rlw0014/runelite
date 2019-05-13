@@ -123,7 +123,6 @@ class Wave
                     importantPointsList[2] += allPointsList[i];
                     break;
                 case 8:
-                case 9:
                     importantPointsList[3] += allPointsList[i];
                     break;
                 default:
