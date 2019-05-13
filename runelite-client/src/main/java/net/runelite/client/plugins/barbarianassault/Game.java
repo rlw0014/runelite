@@ -10,14 +10,12 @@ import net.runelite.client.eventbus.Subscribe;
 import java.awt.*;
 import java.util.ArrayList;
 
+
+@Getter
 public class Game
 {
-    @Getter
     private Client client;
-
-    @Getter
     private String currentWave;
-    @Getter
     private ArrayList<Wave> waves = new ArrayList<>();
     private String[] totalDescriptions = {
             "A: ",

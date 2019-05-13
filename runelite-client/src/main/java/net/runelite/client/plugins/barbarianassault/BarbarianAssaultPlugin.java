@@ -24,7 +24,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.runelite.client.plugins.barbarianassault;
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.Color;
@@ -95,7 +94,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	private int totalHpHealed = 0;
 
 	private boolean hasAnnounced;
-   private Font font;
+	private Font font;
 	private final Image clockImage = ImageUtil.getResourceStreamFromClass(getClass(), "clock.png");
 	private int inGameBit = 0;
 	private String currentWave = START_WAVE;
@@ -155,13 +154,15 @@ public class BarbarianAssaultPlugin extends Plugin
 			WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
 	);
 
-    @Provides
+	@Provides
 	BarbarianAssaultConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(BarbarianAssaultConfig.class);
 	}
+
 	private Game game;
-    private Wave wave;
+	private Wave wave;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -218,31 +219,31 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
-		if (chatMessage.getMessage().toLowerCase().contains("testing"))
-		{
-			ArrayList<Wave> waves = new ArrayList<>();
-			for (int i = 0; i < 1; i++)
-			{
-				Wave wave1 = new Wave(client);
-				int[] amounts = {4, 0, 30, 10, 1, 38};
-				int[] points = {-3, -2, 6, -4, -8, -11};
-				int[] otherPoints = {38, 35, 33, 30};
-				wave1.setWaveAmounts(amounts);
-				wave1.setWavePoints(points, otherPoints);
-				waves.add(wave1);
-				announceSomething(wave1.getWaveSummary());
-			}
-			Game game1 = new Game(client, waves);
-			announceSomething(game1.getGameSummary());
-		}
+//		if (chatMessage.getMessage().toLowerCase().contains("testing"))
+//		{
+//			ArrayList<Wave> waves = new ArrayList<>();
+//			for (int i = 0; i < 1; i++)
+//			{
+//				Wave wave1 = new Wave(client);
+//				int[] amounts = {4, 0, 30, 10, 1, 38};
+//				int[] points = {-3, -2, 6, -4, -8, -11};
+//				int[] otherPoints = {38, 35, 33, 30};
+//				wave1.setWaveAmounts(amounts);
+//				wave1.setWavePoints(points, otherPoints);
+//				waves.add(wave1);
+//				announceSomething(wave1.getWaveSummary());
+//			}
+//			Game game1 = new Game(client, waves);
+//			announceSomething(game1.getGameSummary());
+//		}
 		if (chatMessage.getMessage().toLowerCase().startsWith("wave points"))
 		{
 			hasAnnounced = true;
 		}
-        if (!chatMessage.getType().equals(ChatMessageType.GAMEMESSAGE))
-        {
-            return;
-        }
+		if (!chatMessage.getType().equals(ChatMessageType.GAMEMESSAGE))
+		{
+			return;
+		}
 		int inGame = client.getVar(Varbits.IN_GAME_BA);
 		if (inGameBit != inGame)
 			return;
