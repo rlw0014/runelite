@@ -13,6 +13,7 @@ import java.awt.*;
 
 @Getter
 class Wave
+{
     private Client client;
     private final ImmutableList<WidgetInfo> WIDGETS = ImmutableList.of(
             WidgetInfo.BA_FAILED_ATTACKER_ATTACKS,
