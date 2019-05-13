@@ -91,12 +91,14 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	int tickNum;
 	int pastCall = 0;
 	private int currentWave = 1;
+	private int lastHealer;
 	private static final int BA_WAVE_NUM_INDEX = 2;
 	private final List<MenuEntry> entries = new ArrayList<>();
 	private HashMap<Integer, Instant> foodPressed = new HashMap<>();
 	private CycleCounter counter;
 
 	private boolean shiftDown;
+	private boolean ctrlDown;
 
 	@Inject
 	private Client client;
@@ -119,9 +121,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Inject
 	private InfoBoxManager infoBoxManager;
 
-	@Inject
-	private BAToolsOverlay overlay;
-
 	@Getter
 	private Instant wave_start;
 
@@ -138,11 +137,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(overlay);
 		wave_start = Instant.now();
 		foodPressed.clear();
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
+		lastHealer = 0;
 	}
 
 	@Override
@@ -150,7 +149,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	{
 		removeCounter();
 		inGameBit = 0;
-		overlayManager.remove(overlay);
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
 		shiftDown = false;
@@ -333,6 +331,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			else
 			{
 				addCounter();
+				lastHealer = 0;
 			}
 		}
 
@@ -393,6 +392,26 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		if (config.swapLadder() && option.equals("climb-down") && target.equals("ladder"))
 		{
 			swap("quick-start", option, target, true);
+		}
+
+		if(client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT) == getWidget() && lastHealer != 0 && inGameBit == 1 && config.ctrlHealer() && ctrlDown)
+		{
+			MenuEntry[] menuEntries = client.getMenuEntries();
+			MenuEntry correctHealer = null;
+			entries.clear();
+
+			for (MenuEntry entry : menuEntries)
+			{
+				if (entry.getIdentifier() == lastHealer)
+				{
+					correctHealer = entry;
+				}
+			}
+			if (correctHealer != null)
+			{
+				entries.add(correctHealer);
+				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+			}
 		}
 
 		if ((event.getTarget().contains("Penance Healer") || event.getTarget().contains("Penance Fighter") || event.getTarget().contains("Penance Ranger")))
@@ -509,6 +528,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			if (target.contains("->"))
 			{
 				foodPressed.put(event.getId(), Instant.now());
+				lastHealer = event.getId();
 			}
 		}
 	}
@@ -604,6 +624,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			shiftDown = true;
 		}
+		if (e.getKeyCode() == KeyEvent.VK_CONTROL)
+		{
+			ctrlDown = true;
+		}
 	}
 
 	@Override
@@ -612,6 +636,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		if (e.getKeyCode() == KeyEvent.VK_SHIFT)
 		{
 			shiftDown = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_CONTROL)
+		{
+			ctrlDown = false;
 		}
 	}
 

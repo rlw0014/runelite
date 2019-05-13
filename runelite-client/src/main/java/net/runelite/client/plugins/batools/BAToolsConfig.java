@@ -135,7 +135,7 @@ public interface BAToolsConfig extends Config
 	@ConfigItem(
 		keyName = "attackStyles",
 		name = "Attack Styles",
-		description = "Remove incorrect attack styles for hally/claws"
+		description = "Remove incorrect attack styles for hally/claws and if shift held down = all attack options are removed to help walk to the correct tiles"
 	)
 	default boolean attackStyles()
 	{
@@ -148,6 +148,16 @@ public interface BAToolsConfig extends Config
 		description = "Highlights the menu entry of an attacker/ranger that has not been tagged."
 	)
 	default boolean tagging()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "ctrlHealer",
+			name = "Control Healer",
+			description = "Hold ctrl to put last healer clicked on top"
+	)
+	default boolean ctrlHealer()
 	{
 		return false;
 	}
