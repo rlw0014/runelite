@@ -135,13 +135,13 @@ public interface BarbarianAssaultConfig extends Config
 		return Color.GREEN;
 	}
 
-	@ConfigItem(
-			keyName = "testing",
-			name = "Testing",
-			description = "enables 'testing' keyword"
-	)
-	default boolean testing()
-	{
-		return false;
-	}
+//	@ConfigItem(
+//			keyName = "testing",
+//			name = "Testing",
+//			description = "enables 'testing' keyword"
+//	)
+//	default boolean testing()
+//	{
+//		return false;
+//	}
 }
