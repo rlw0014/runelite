@@ -217,9 +217,8 @@ public class BarbarianAssaultPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage)
-	{
-		if (chatMessage.getMessage().toLowerCase().contains("testing"))
+	public void onChatMessage(ChatMessage chatMessage) {
+        if (chatMessage.getMessage().toLowerCase().contains("testing") && config.testing())
 		{
 			ArrayList<Wave> waves = new ArrayList<>();
 			for (int i = 0; i < 1; i++)
@@ -297,7 +296,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 	}
 
-	@Subscribe
+    @Subscribe
 	public void onItemContainerChanged(final ItemContainerChanged event)
 	{
 		if (event.getItemContainer() != client.getItemContainer(InventoryID.EQUIPMENT))
