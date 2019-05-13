@@ -10,7 +10,6 @@ import net.runelite.client.eventbus.Subscribe;
 import java.awt.*;
 import java.util.ArrayList;
 
-
 @Getter
 public class Game
 {
