@@ -62,10 +62,6 @@ class Wave
     {
         this.client = client;
     }
-    int[] getOtherRolesPointsList()
-    {
-        return otherRolesPointsList;
-    }
     void setWaveAmounts(int[] amounts)
     {
         for (int i = 0; i < amounts.length; i++)
@@ -114,7 +110,6 @@ class Wave
                     wavePoints[2] += allPointsList[i];
                     break;
                 case 8:
-                case 9:
                     wavePoints[3] += allPointsList[i];
                     break;
                 default:
