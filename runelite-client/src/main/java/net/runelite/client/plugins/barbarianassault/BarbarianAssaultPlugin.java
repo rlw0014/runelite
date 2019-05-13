@@ -217,25 +217,24 @@ public class BarbarianAssaultPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage)
-	{
-		if (chatMessage.getMessage().toLowerCase().contains("testing"))
-		{
-			ArrayList<Wave> waves = new ArrayList<>();
-			for (int i = 0; i < 1; i++)
-			{
-				Wave wave1 = new Wave(client);
-				int[] amounts = {4, 0, 30, 10, 1, 38};
-				int[] points = {-3, -2, 6, -4, -8, -11};
-				int[] otherPoints = {38, 35, 33, 30};
-				wave1.setWaveAmounts(amounts);
-				wave1.setWavePoints(points, otherPoints);
-				waves.add(wave1);
-				announceSomething(wave1.getWaveSummary());
-			}
-			Game game1 = new Game(client, waves);
-			announceSomething(game1.getGameSummary());
-		}
+	public void onChatMessage(ChatMessage chatMessage) {
+//        if (chatMessage.getMessage().toLowerCase().contains("testing") && config.testing())
+//		{
+//			ArrayList<Wave> waves = new ArrayList<>();
+//			for (int i = 0; i < 1; i++)
+//			{
+//				Wave wave1 = new Wave(client);
+//				int[] amounts = {4, 0, 30, 10, 1, 38};
+//				int[] points = {-3, -2, 6, -4, -8, -11};
+//				int[] otherPoints = {38, 35, 33, 30};
+//				wave1.setWaveAmounts(amounts);
+//				wave1.setWavePoints(points, otherPoints);
+//				waves.add(wave1);
+//				announceSomething(wave1.getWaveSummary());
+//			}
+//			Game game1 = new Game(client, waves);
+//			announceSomething(game1.getGameSummary());
+//		}
 		if (chatMessage.getMessage().toLowerCase().startsWith("wave points"))
 		{
 			hasAnnounced = true;
@@ -297,7 +296,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 	}
 
-	@Subscribe
+    @Subscribe
 	public void onItemContainerChanged(final ItemContainerChanged event)
 	{
 		if (event.getItemContainer() != client.getItemContainer(InventoryID.EQUIPMENT))

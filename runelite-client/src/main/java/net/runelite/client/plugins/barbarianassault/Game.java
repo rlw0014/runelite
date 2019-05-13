@@ -10,6 +10,7 @@ import net.runelite.client.eventbus.Subscribe;
 import java.awt.*;
 import java.util.ArrayList;
 
+
 @Getter
 public class Game
 {
@@ -49,6 +50,7 @@ public class Game
         {
             String[] tempMessage = chatMessage.getMessage().split(" ");
             currentWave = tempMessage[2];
+            String[] temp = currentWave.split(" ");
         }
         if (currentWave.equals("1"))
         {

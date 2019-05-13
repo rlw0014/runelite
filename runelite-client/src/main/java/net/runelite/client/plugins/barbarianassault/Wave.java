@@ -40,6 +40,7 @@ class Wave
             WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
             WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
     );
+
     private int[] waveAmounts = new int[6];
     private int[] allPointsList = new int[10];
     private int[] wavePoints = new int[6];
