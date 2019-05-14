@@ -522,7 +522,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			log.info(target);
 		}
 
-		if (config.healerMenuOption() && event.getMenuTarget().contains("Penance Healer"))
+		if (config.healerMenuOption() && event.getMenuTarget().contains("Penance Healer") && !ctrlDown)
 		{
 			String target = event.getMenuTarget();
 			if (target.contains("->"))
