@@ -111,7 +111,6 @@ class Wave
                     wavePoints[2] += allPointsList[i];
                     break;
                 case 8:
-                case 9:
                     wavePoints[3] += allPointsList[i];
                     break;
                 default:
