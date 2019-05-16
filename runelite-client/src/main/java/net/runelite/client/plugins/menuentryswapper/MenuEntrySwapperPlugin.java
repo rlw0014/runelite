@@ -35,6 +35,8 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
+import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
+import static net.runelite.api.MenuAction.WALK;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.events.ConfigChanged;
@@ -368,6 +370,19 @@ public class MenuEntrySwapperPlugin extends Plugin
 			&& hintArrowNpc.getIndex() == eventId
 			&& NPC_MENU_TYPES.contains(MenuAction.of(event.getType())))
 		{
+			return;
+		}
+
+		if (config.shiftWalk() && shiftModifier)
+		{
+			if (event.getType() < WALK.getId())
+			{
+				MenuEntry[] menuEntries = client.getMenuEntries();
+				MenuEntry menuEntry = menuEntries[menuEntries.length - 1];
+				menuEntry.setType(event.getType() + MENU_ACTION_DEPRIORITIZE_OFFSET);
+
+				client.setMenuEntries(menuEntries);
+			}
 			return;
 		}
 
