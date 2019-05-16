@@ -371,7 +371,10 @@ public class MenuEntrySwapperPlugin extends Plugin
 			return;
 		}
 
-		if (config.shiftWalkHere() && shiftModifier)
+		if (config.shiftWalkHere() && shiftModifier &&
+				!option.equals("Stock-Up") && !option.equals("Take-Vial") &&
+				!option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
+				!option.equals("Take-Meat"))
 		{
 			// Keep moving 'Walk here' to the end of the entries (left-click option)
 			MenuEntry[] entries = client.getMenuEntries();
