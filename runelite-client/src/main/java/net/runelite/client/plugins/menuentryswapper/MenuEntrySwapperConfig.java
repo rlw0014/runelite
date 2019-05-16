@@ -281,4 +281,15 @@ public interface MenuEntrySwapperConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		position = 19,
+		keyName = "shiftWalkHere",
+		name = "Shift-Click Walk here",
+		description = "Make Walk here the left-click option when holding shift"
+	)
+	default boolean shiftWalkHere()
+	{
+		return false;
+	}
 }
