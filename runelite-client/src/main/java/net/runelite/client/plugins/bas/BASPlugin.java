@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2018, Cameron <https://github.com/noremac201>
  * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
  * All rights reserved.
  *
@@ -25,11 +24,18 @@
  */
 package net.runelite.client.plugins.bas;
 
+import java.io.IOException;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.StringReader;
+import net.runelite.http.api.RuneLiteAPI;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -40,7 +46,6 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.ClanChanged;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
@@ -52,14 +57,15 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
-	name = "BAS",
-	description = "BAS Customer CC Info",
-	tags = {"minigame"}
+		name = "BAS",
+		description = "BAS Customer CC Info",
+		tags = {"minigame"}
 )
 public class BASPlugin extends Plugin
 {
 	private List<String[]> csvContent = new ArrayList<>();
 	private List<String> premList = new ArrayList<>();
+	private Widget[] members = new Widget[0];
 	private int count;
 
 	@Inject
@@ -86,7 +92,7 @@ public class BASPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		readCSV();
+		count=0;
 	}
 
 	@Override
@@ -102,49 +108,26 @@ public class BASPlugin extends Plugin
 		{
 			checkCustomers();
 		}
-	}
-
-	@Subscribe
-	public void onClanChanged(ClanChanged changed) throws Exception
-	{
-
-		if(client.getWidget(WidgetInfo.CLAN_CHAT_OWNER)==null)
-		{
-			return;
-		}
-
-		Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-		if(owner.getText().equals("<col=ffffff>Ba Services</col>"))
-		{
-			readCSV();
-		}
-
-		count=0;
+		count=members.length==0?0:client.getClanChatCount();
 	}
 
 	private void checkCustomers()
 	{
 		if (config.basFeature())
 		{
-			log.info("checking");
 			Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
 			if (clanChatTitleWidget != null)
 			{
 				Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
 				Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-				if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
-				{
-					Widget[] members = clanChatList.getDynamicChildren();
-					for (Widget member : members)
-					{
-						if (member.getTextColor() == 16777215)
-						{
-							for (String[] user : csvContent)
-							{
-								if (user[1].toLowerCase().contains(member.getText().toLowerCase()))
-								{
-									switch(user[2])
-									{
+				if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>")) {
+					readCSV();
+					members = clanChatList.getDynamicChildren();
+					for (Widget member : members) {
+						if (member.getTextColor() == 16777215) {
+							for (String[] user : csvContent) {
+								if (user[1].toLowerCase().contains(member.getText().toLowerCase())) {
+									switch (user[2]) {
 										case "":
 											member.setText(member.getText() + " (U)");
 											break;
@@ -155,64 +138,53 @@ public class BASPlugin extends Plugin
 											member.setText(member.getText() + " (P)");
 											break;
 									}
-									if (user[0].equals("P"))
-									{
+									if (user[0].equals("P")) {
 										member.setTextColor(6604900);
 										boolean inList = false;
-										for (String prem : premList)
-										{
-											if (member.getText().toLowerCase().contains(prem.toLowerCase()))
-											{
+										for (String prem : premList) {
+											if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
 												inList = true;
 											}
 										}
-										if (!inList)
-										{
+										if (!inList) {
 											premList.add(member.getText());
 											final String chatMessage = new ChatMessageBuilder()
-												.append(ChatColorType.NORMAL)
-												.append("Premium leech " + member.getText())
-												.append(ChatColorType.HIGHLIGHT)
-												.append(" online.")
-												.build();
+													.append(ChatColorType.NORMAL)
+													.append("Premium leech " + member.getText())
+													.append(ChatColorType.HIGHLIGHT)
+													.append(" online.")
+													.build();
 											chatMessageManager.queue(QueuedMessage.builder()
-												.type(ChatMessageType.CONSOLE)
-												.runeLiteFormattedMessage(chatMessage)
-												.build());
+													.type(ChatMessageType.CONSOLE)
+													.runeLiteFormattedMessage(chatMessage)
+													.build());
 										}
-									}
-									else
-									{
+									} else {
 										member.setTextColor(6579400);
 									}
 								}
 							}
 						}
 					}
-					for (String prem : premList)
-					{
+					for (String prem : premList) {
 						boolean online = false;
-						log.info("members size = "+ members.length);
-						for (Widget member : members)
-						{
-							if(member.getText().toLowerCase().contains(prem.toLowerCase()))
-							{
+						for (Widget member : members) {
+							if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
 								online = true;
 							}
 						}
-						if(!online)
-						{
+						if (!online) {
 							premList.remove(prem);
 							final String chatMessage = new ChatMessageBuilder()
-								.append(ChatColorType.NORMAL)
-								.append("Premium leech " + prem)
-								.append(ChatColorType.HIGHLIGHT)
-								.append(" offline.")
-								.build();
+									.append(ChatColorType.NORMAL)
+									.append("Premium leech " + prem)
+									.append(ChatColorType.HIGHLIGHT)
+									.append(" offline.")
+									.build();
 							chatMessageManager.queue(QueuedMessage.builder()
-								.type(ChatMessageType.CONSOLE)
-								.runeLiteFormattedMessage(chatMessage)
-								.build());
+									.type(ChatMessageType.CONSOLE)
+									.runeLiteFormattedMessage(chatMessage)
+									.build());
 						}
 					}
 				}
@@ -220,17 +192,46 @@ public class BASPlugin extends Plugin
 		}
 	}
 
-	private void readCSV() throws Exception
+	private void readCSV()
 	{
-		String st = "https://docs.google.com/spreadsheets/d/1Jh9Nj6BvWVgzZ9urnTTNniQLkgprx_TMggaz8gt_iDM/export?format=csv";
-		URL stockURL = new URL(st);
-		BufferedReader in = new BufferedReader(new InputStreamReader(stockURL.openStream()));
-		String s;
-		csvContent.clear();
-		while ((s = in.readLine()) != null)
+		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+
+		HttpUrl httpUrl = new HttpUrl.Builder()
+				.scheme("https")
+				.host("docs.google.com")
+				.addPathSegment("spreadsheets")
+				.addPathSegment("d")
+				.addPathSegment("1Jh9Nj6BvWVgzZ9urnTTNniQLkgprx_TMggaz8gt_iDM")
+				.addPathSegment("export")
+				.addQueryParameter("format", "csv")
+				.build();
+
+		Request request = new Request.Builder()
+				.header("User-Agent", "RuneLite")
+				.url(httpUrl)
+				.build();
+
+
+		httpClient.newCall(request).enqueue(new Callback()
 		{
-			String[] splitString = s.split(",");
-			csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
-		}
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				log.warn("Error sending http request.", e.getMessage());
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				BufferedReader in = new BufferedReader(new StringReader(response.body().string()));
+				String s;
+				csvContent.clear();
+				while ((s = in.readLine()) != null)
+				{
+					String[] splitString = s.split(",");
+					csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
+				}
+			}
+		});
 	}
 }
