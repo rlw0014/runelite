@@ -92,6 +92,7 @@ public class BASPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		readCSV();
 		count=0;
 	}
 
@@ -106,9 +107,10 @@ public class BASPlugin extends Plugin
 	{
 		if(count!=client.getClanChatCount())
 		{
-			checkCustomers();
+			readCSV();
 		}
 		count=members.length==0?0:client.getClanChatCount();
+		checkCustomers();
 	}
 
 	private void checkCustomers()
@@ -120,10 +122,11 @@ public class BASPlugin extends Plugin
 			{
 				Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
 				Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-				if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>")) {
-					readCSV();
+				if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
+				{
 					members = clanChatList.getDynamicChildren();
-					for (Widget member : members) {
+					for (Widget member : members)
+					{
 						if (member.getTextColor() == 16777215) {
 							for (String[] user : csvContent) {
 								if (user[1].toLowerCase().contains(member.getText().toLowerCase())) {
@@ -166,25 +169,28 @@ public class BASPlugin extends Plugin
 							}
 						}
 					}
-					for (String prem : premList) {
-						boolean online = false;
-						for (Widget member : members) {
-							if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
-								online = true;
+					if(premList.size()>0)
+					{
+						for (String prem : premList) {
+							boolean online = false;
+							for (Widget member : members) {
+								if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
+									online = true;
+								}
 							}
-						}
-						if (!online) {
-							premList.remove(prem);
-							final String chatMessage = new ChatMessageBuilder()
-									.append(ChatColorType.NORMAL)
-									.append("Premium leech " + prem)
-									.append(ChatColorType.HIGHLIGHT)
-									.append(" offline.")
-									.build();
-							chatMessageManager.queue(QueuedMessage.builder()
-									.type(ChatMessageType.CONSOLE)
-									.runeLiteFormattedMessage(chatMessage)
-									.build());
+							if (!online) {
+								premList.remove(prem);
+								final String chatMessage = new ChatMessageBuilder()
+										.append(ChatColorType.NORMAL)
+										.append("Premium leech " + prem)
+										.append(ChatColorType.HIGHLIGHT)
+										.append(" offline.")
+										.build();
+								chatMessageManager.queue(QueuedMessage.builder()
+										.type(ChatMessageType.CONSOLE)
+										.runeLiteFormattedMessage(chatMessage)
+										.build());
+							}
 						}
 					}
 				}

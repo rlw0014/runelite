@@ -281,7 +281,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			counter.setCount(tickNum);
 			if (config.defTimer())
 			{
-				log.info("" + tickNum++);
+				//log.info("" + tickNum++);
 			}
 		}
 
@@ -402,16 +402,28 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 			for (MenuEntry entry : menuEntries)
 			{
-				if (entry.getIdentifier() == lastHealer)
+
+				if((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use"))
+						||
+						(
+								(entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu"))
+								&&
+								entry.getOption().equals("Use")
+						)
+				)
 				{
 					correctHealer = entry;
+				}
+				else
+				{
+					log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use")) + " "+((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")) );
 				}
 			}
 			if (correctHealer != null)
 			{
 				entries.add(correctHealer);
-				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
+			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
 
 		if ((event.getTarget().contains("Penance Healer") || event.getTarget().contains("Penance Fighter") || event.getTarget().contains("Penance Ranger")))
@@ -512,9 +524,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+		String target = event.getMenuTarget();
+
 		if(config.tagging() && (event.getMenuTarget().contains("Penance Ranger") || event.getMenuTarget().contains("Penance Fighter")))
 		{
-			String target = event.getMenuTarget();
 			if (event.getMenuOption().contains("Attack"))
 			{
 				foodPressed.put(event.getId(), Instant.now());
@@ -522,14 +535,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			log.info(target);
 		}
 
-		if (config.healerMenuOption() && event.getMenuTarget().contains("Penance Healer") && !ctrlDown)
+		if (config.healerMenuOption() && target.contains("Penance Healer") && target.contains("<col=ff9040>Poisoned") && target.contains("->"))
 		{
-			String target = event.getMenuTarget();
-			if (target.contains("->"))
-			{
-				foodPressed.put(event.getId(), Instant.now());
-				lastHealer = event.getId();
-			}
+			foodPressed.put(event.getId(), Instant.now());
+			lastHealer = event.getId();
+			log.info("Last healer changed: " + lastHealer);
 		}
 	}
 
