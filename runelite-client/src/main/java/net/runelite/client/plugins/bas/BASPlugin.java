@@ -25,6 +25,8 @@
 package net.runelite.client.plugins.bas;
 
 import java.io.IOException;
+
+import net.runelite.api.events.ClanMemberJoined;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
@@ -108,6 +110,7 @@ public class BASPlugin extends Plugin
 		if(count!=client.getClanChatCount())
 		{
 			readCSV();
+			updateQueue();
 		}
 		count=members.length==0?0:client.getClanChatCount();
 		checkCustomers();
@@ -122,10 +125,6 @@ public class BASPlugin extends Plugin
 			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
 			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
 			{
-				if(config.autoUpdateQueue())
-				{
-					updateQueue();
-				}
 				members = clanChatList.getDynamicChildren();
 				for (Widget member : members)
 				{
@@ -205,6 +204,41 @@ public class BASPlugin extends Plugin
 		}
 	}
 
+	private void checkPrem()
+	{
+		if (premList.size() > 0)
+		{
+			for (String prem : premList)
+			{
+				boolean online = false;
+				for (Widget member : members)
+				{
+					if (member.getText().toLowerCase().contains(prem.toLowerCase()))
+					{
+						online = true;
+					}
+				}
+				if (!online)
+				{
+					premList.remove(prem);
+					final String chatMessage = new ChatMessageBuilder()
+							.append(ChatColorType.NORMAL)
+							.append("Premium leech " + prem)
+							.append(ChatColorType.HIGHLIGHT)
+							.append(" offline.")
+							.build();
+					if (config.premNotifier())
+					{
+						chatMessageManager.queue(QueuedMessage.builder()
+								.type(ChatMessageType.CONSOLE)
+								.runeLiteFormattedMessage(chatMessage)
+								.build());
+					}
+				}
+			}
+		}
+	}
+
 	private void readCSV()
 	{
 		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
@@ -250,60 +284,72 @@ public class BASPlugin extends Plugin
 
 	private void updateQueue()
 	{
-		String csv = "";
 
-		for (Widget member : members)
-		{
-			if (member.getTextColor() != 16777060 && member.getTextColor()!=0 && member.getTextColor()!=901389)
+		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
+		if (clanChatTitleWidget != null) {
+			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
+			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
+			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
 			{
-				String memberName = member.getText();
+					String csv = "";
 
-				if(memberName.contains("("))
-				{
-					memberName = memberName.split(" \\(")[0];
-				}
-				if(csv.equals(""))
-				{
-					csv = memberName;
-				}
-				else
-				{
-					csv = csv + "," + memberName;
-				}
+					for (Widget member : members)
+					{
+						if (member.getTextColor() != 16777060 && member.getTextColor()!=0 && member.getTextColor()!=901389)
+						{
+							String memberName = member.getText();
+
+							if(memberName.contains("("))
+							{
+								memberName = memberName.split(" \\(")[0];
+							}
+							if(csv.equals(""))
+							{
+								csv = memberName;
+							}
+							else
+							{
+								csv = csv + "," + memberName;
+							}
+						}
+					}
+					if(csv.equals(""))
+					{
+						return;
+					}
+
+					OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+					HttpUrl httpUrl = new HttpUrl.Builder()
+							.scheme("http")
+							.host("blairm.net")
+							.addPathSegment("bas")
+							.addPathSegment("update.php")
+							.addQueryParameter("d", csv)
+							.build();
+
+					Request request = new Request.Builder()
+							.header("User-Agent", "RuneLite")
+							.url(httpUrl)
+							.build();
+
+					log.info("sending: " +httpUrl.toString());
+
+					httpClient.newCall(request).enqueue(new Callback()
+					{
+						@Override
+						public void onFailure(Call call, IOException e)
+						{
+							log.warn("Error sending http request.", e.getMessage());
+						}
+
+						@Override
+						public void onResponse(Call call, Response response) throws IOException
+						{
+						}
+					});
+
+
 			}
 		}
-		if(csv.equals(""))
-		{
-			return;
-		}
-
-		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
-
-		HttpUrl httpUrl = new HttpUrl.Builder()
-				.scheme("http")
-				.host("blairm.net")
-				.addPathSegment("bas")
-				.addPathSegment("update.php")
-				.addQueryParameter("d", csv)
-				.build();
-
-		Request request = new Request.Builder()
-				.header("User-Agent", "RuneLite")
-				.url(httpUrl)
-				.build();
-
-		httpClient.newCall(request).enqueue(new Callback()
-		{
-			@Override
-			public void onFailure(Call call, IOException e)
-			{
-				log.warn("Error sending http request.", e.getMessage());
-			}
-
-			@Override
-			public void onResponse(Call call, Response response) throws IOException
-			{
-			}
-		});
 	}
 }
