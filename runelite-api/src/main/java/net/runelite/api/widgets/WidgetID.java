@@ -580,7 +580,7 @@ public class WidgetID
 		static final int CURRENT_WAVE = 5;
 		static final int LISTEN_WIDGET = 6;
 		static final int TO_CALL_WIDGET = 8;
-		static final int CORRECT_STYLE = 7;
+		static final int LISTEN = 7;
 
 
 		static final int TO_CALL = 9;

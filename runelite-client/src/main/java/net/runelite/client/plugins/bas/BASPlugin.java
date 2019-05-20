@@ -1,8 +1,5 @@
 /*
-<<<<<<< HEAD
  * Copyright (c) 2018, Cameron <https://github.com/noremac201>
-=======
->>>>>>> Jacob/cs
  * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
  * All rights reserved.
  *
