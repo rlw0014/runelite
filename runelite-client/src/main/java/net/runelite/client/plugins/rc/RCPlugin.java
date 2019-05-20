@@ -23,11 +23,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.menuentryswapper;
+package net.runelite.client.plugins.rc;
 
-import com.google.common.collect.ImmutableSet;
+import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
-import java.util.Set;
+import java.awt.Color;
+import java.util.Collection;
+import java.util.Collections;
+
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +39,6 @@ import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.NPC;
 import net.runelite.api.events.ConfigChanged;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.MenuEntryAdded;
@@ -45,31 +47,33 @@ import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.PostItemComposition;
 import net.runelite.api.events.WidgetMenuOptionClicked;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.client.callback.ClientThread;
+import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 
 @PluginDescriptor(
-	name = "Menu Entry Swapper",
+	name = "Runecrafting addons",
 	description = "Change the default option that is displayed when hovering over objects",
 	tags = {"npcs", "inventory", "items", "objects"},
 	enabledByDefault = false
 )
-public class MenuEntrySwapperPlugin extends Plugin
+public class RCPlugin extends Plugin
 {
 	private static final String CONFIGURE = "Configure";
 	private static final String SAVE = "Save";
 	private static final String RESET = "Reset";
-	private static final String MENU_TARGET = "Shift-click";
+	private static final String MENU_TARGET = ColorUtil.prependColorTag("Shift-click", new Color(255, 144, 64));
 
 	private static final String CONFIG_GROUP = "shiftclick";
 	private static final String ITEM_KEY_PREFIX = "item_";
@@ -92,37 +96,23 @@ public class MenuEntrySwapperPlugin extends Plugin
 	private static final WidgetMenuOption RESIZABLE_BOTTOM_LINE_INVENTORY_TAB_SAVE = new WidgetMenuOption(SAVE,
 		MENU_TARGET, WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
 
-	private static final Set<MenuAction> NPC_MENU_TYPES = ImmutableSet.of(
-		MenuAction.NPC_FIRST_OPTION,
-		MenuAction.NPC_SECOND_OPTION,
-		MenuAction.NPC_THIRD_OPTION,
-		MenuAction.NPC_FOURTH_OPTION,
-		MenuAction.NPC_FIFTH_OPTION,
-		MenuAction.EXAMINE_NPC);
-
 	@Inject
 	private Client client;
 
 	@Inject
-	private ClientThread clientThread;
-
-	@Inject
-	private MenuEntrySwapperConfig config;
-
-	@Inject
-	private ShiftClickInputListener inputListener;
+	private RCConfig config;
 
 	@Inject
 	private ConfigManager configManager;
+
+	@Inject
+	private ItemManager itemManager;
 
 	@Inject
 	private KeyManager keyManager;
 
 	@Inject
 	private MenuManager menuManager;
-
-	@Inject
-	private ItemManager itemManager;
 
 	@Getter
 	private boolean configuringShiftClick = false;
@@ -131,60 +121,14 @@ public class MenuEntrySwapperPlugin extends Plugin
 	private boolean shiftModifier = false;
 
 	@Provides
-	MenuEntrySwapperConfig provideConfig(ConfigManager configManager)
+	RCConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(MenuEntrySwapperConfig.class);
+		return configManager.getConfig(RCConfig.class);
 	}
 
-	@Override
-	public void startUp()
-	{
-		if (config.shiftClickCustomization())
-		{
-			enableCustomization();
-		}
-	}
-
-	@Override
-	public void shutDown()
-	{
-		disableCustomization();
-	}
-
-	@Subscribe
-	public void onConfigChanged(ConfigChanged event)
-	{
-		if (!CONFIG_GROUP.equals(event.getGroup()))
-		{
-			return;
-		}
-
-		if (event.getKey().equals("shiftClickCustomization"))
-		{
-			if (config.shiftClickCustomization())
-			{
-				enableCustomization();
-			}
-			else
-			{
-				disableCustomization();
-			}
-		}
-		else if (event.getKey().startsWith(ITEM_KEY_PREFIX))
-		{
-			clientThread.invoke(this::resetItemCompositionCache);
-		}
-	}
-
-	private void resetItemCompositionCache()
-	{
-		itemManager.invalidateItemCompositionCache();
-		client.getItemCompositionCache().reset();
-	}
 
 	private Integer getSwapConfig(int itemId)
 	{
-		itemId = ItemVariationMapping.map(itemId);
 		String config = configManager.getConfiguration(CONFIG_GROUP, ITEM_KEY_PREFIX + itemId);
 		if (config == null || config.isEmpty())
 		{
@@ -196,29 +140,12 @@ public class MenuEntrySwapperPlugin extends Plugin
 
 	private void setSwapConfig(int itemId, int index)
 	{
-		itemId = ItemVariationMapping.map(itemId);
 		configManager.setConfiguration(CONFIG_GROUP, ITEM_KEY_PREFIX + itemId, index);
 	}
 
 	private void unsetSwapConfig(int itemId)
 	{
-		itemId = ItemVariationMapping.map(itemId);
 		configManager.unsetConfiguration(CONFIG_GROUP, ITEM_KEY_PREFIX + itemId);
-	}
-
-	private void enableCustomization()
-	{
-		keyManager.registerKeyListener(inputListener);
-		refreshShiftClickCustomizationMenus();
-		clientThread.invoke(this::resetItemCompositionCache);
-	}
-
-	private void disableCustomization()
-	{
-		keyManager.unregisterKeyListener(inputListener);
-		removeShiftClickCustomizationMenus();
-		configuringShiftClick = false;
-		clientThread.invoke(this::resetItemCompositionCache);
 	}
 
 	@Subscribe
@@ -228,7 +155,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 			|| event.getWidget() == WidgetInfo.RESIZABLE_VIEWPORT_INVENTORY_TAB
 			|| event.getWidget() == WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB)
 		{
-			configuringShiftClick = event.getMenuOption().equals(CONFIGURE) && Text.removeTags(event.getMenuTarget()).equals(MENU_TARGET);
+			configuringShiftClick = event.getMenuOption().equals(CONFIGURE);
 			refreshShiftClickCustomizationMenus();
 		}
 	}
@@ -316,6 +243,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if (option.equals(RESET) && target.equals(MENU_TARGET))
 		{
 			unsetSwapConfig(itemId);
+			itemComposition.resetShiftClickActionIndex();
 			return;
 		}
 
@@ -348,6 +276,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if (valid)
 		{
 			setSwapConfig(itemId, index);
+			itemComposition.setShiftClickActionIndex(index);
 		}
 	}
 
@@ -359,281 +288,34 @@ public class MenuEntrySwapperPlugin extends Plugin
 			return;
 		}
 
-		final int eventId = event.getIdentifier();
-		final String option = Text.removeTags(event.getOption()).toLowerCase();
-		final String target = Text.removeTags(event.getTarget()).toLowerCase();
-		final NPC hintArrowNpc  = client.getHintArrowNpc();
+		int itemId = event.getIdentifier();
+		String option = Text.removeTags(event.getOption()).toLowerCase();
+		String target = Text.removeTags(event.getTarget()).toLowerCase();
 
-		if (hintArrowNpc != null
-			&& hintArrowNpc.getIndex() == eventId
-			&& NPC_MENU_TYPES.contains(MenuAction.of(event.getType())))
-		{
-			return;
-		}
 
-		if (config.shiftWalkHere() && shiftModifier &&
-				!option.equals("Stock-Up") && !option.equals("Take-Vial") &&
-				!option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
-				!option.equals("Take-Meat"))
-		{
-			// Keep moving 'Walk here' to the end of the entries (left-click option)
-			MenuEntry[] entries = client.getMenuEntries();
-			int walkIdx = searchIndex(entries, "Walk here", "", false);
 
-			if (walkIdx > 0 && walkIdx <= entries.length)
-			{
-				MenuEntry walkHere = entries[walkIdx];
-				MenuEntry currentTop = entries[entries.length - 1];
-
-				entries[walkIdx] = currentTop;
-				entries[entries.length - 1] = walkHere;
-
-				client.setMenuEntries(entries);
-			}
-		}
-
-		if (option.equals("talk-to"))
+		if (config.swapTeleports() && option.equals("remove") && target.startsWith("ring of dueling"))
 		{
-			if (config.swapPickpocket() && target.contains("h.a.m."))
-			{
-				swap("pickpocket", option, target, true);
-			}
-
-			if (config.swapAbyssTeleport() && target.contains("mage of zamorak"))
-			{
-				swap("teleport", option, target, true);
-			}
-
-			if (config.swapBank())
-			{
-				swap("bank", option, target, true);
-			}
-
-			if (config.swapContract())
-			{
-				swap("contract", option, target, true);
-			}
-
-			if (config.swapExchange())
-			{
-				swap("exchange", option, target, true);
-			}
-
-			if (config.swapDarkMage())
-			{
-				swap("repairs", option, target, true);
-			}
-
-			// make sure assignment swap is higher priority than trade swap for slayer masters
-			if (config.swapAssignment())
-			{
-				swap("assignment", option, target, true);
-			}
-
-			if (config.swapTrade())
-			{
-				swap("trade", option, target, true);
-				swap("trade-with", option, target, true);
-			}
-
-			if (config.claimSlime() && target.equals("robin"))
-			{
-				swap("claim-slime", option, target, true);
-			}
-
-			if (config.swapTravel())
-			{
-				swap("travel", option, target, true);
-				swap("pay-fare", option, target, true);
-				swap("charter", option, target, true);
-				swap("take-boat", option, target, true);
-				swap("fly", option, target, true);
-				swap("jatizso", option, target, true);
-				swap("neitiznot", option, target, true);
-				swap("rellekka", option, target, true);
-				swap("follow", option, target, true);
-				swap("transport", option, target, true);
-			}
-
-			if (config.swapPay())
-			{
-				swap("pay", option, target, true);
-				swap("pay (", option, target, false);
-			}
-
-			if (config.swapDecant())
-			{
-				swap("decant", option, target, true);
-			}
-
-			if (config.swapQuick())
-			{
-				swap("quick-travel", option, target, true);
-			}
+			swap("duel arena", option, target, true);
 		}
-		else if (config.swapConstruction() && target.equals("guild trophy space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mythical cape") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("table space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mahogany table") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapTravel() && option.equals("pass") && target.equals("energy barrier"))
-		{
-			swap("pay-toll(2-ecto)", option, target, true);
-		}
-		else if (config.swapTravel() && option.equals("open") && target.equals("gate"))
-		{
-			swap("pay-toll(10gp)", option, target, true);
-		}
-		else if (config.swapTravel() && option.equals("inspect") && target.equals("trapdoor"))
-		{
-			swap("travel", option, target, true);
-		}
-		else if (config.swapHarpoon() && option.equals("cage"))
-		{
-			swap("harpoon", option, target, true);
-		}
-		else if (config.swapHarpoon() && (option.equals("big net") || option.equals("net")))
-		{
-			swap("harpoon", option, target, true);
-		}
-		else if (config.swapHomePortal() != HouseMode.ENTER && option.equals("enter"))
-		{
-			switch (config.swapHomePortal())
-			{
-				case HOME:
-					swap("home", option, target, true);
-					break;
-				case BUILD_MODE:
-					swap("build mode", option, target, true);
-					break;
-				case FRIENDS_HOUSE:
-					swap("friend's house", option, target, true);
-					break;
-			}
-		}
-		else if (config.swapFairyRing() != FairyRingMode.OFF && config.swapFairyRing() != FairyRingMode.ZANARIS
-			&& (option.equals("zanaris") || option.equals("configure") || option.equals("tree")))
-		{
-			if (config.swapFairyRing() == FairyRingMode.LAST_DESTINATION)
-			{
-				swap("last-destination", option, target, false);
-			}
-			else if (config.swapFairyRing() == FairyRingMode.CONFIGURE)
-			{
-				swap("configure", option, target, false);
-			}
-		}
-		else if (config.swapFairyRing() == FairyRingMode.ZANARIS && option.equals("tree"))
-		{
-			swap("zanaris", option, target, false);
-		}
-		else if (config.swapBoxTrap() && (option.equals("check") || option.equals("dismantle")))
-		{
-			swap("reset", option, target, true);
-		}
-		else if (config.swapBoxTrap() && option.equals("take"))
-		{
-			swap("lay", option, target, true);
-		}
-		else if (config.swapChase() && option.equals("pick-up"))
-		{
-			swap("chase", option, target, true);
-		}
-		else if (config.swapBirdhouseEmpty() && option.equals("interact") && target.contains("birdhouse"))
-		{
-			swap("empty", option, target, true);
-		}
-		else if (config.swapQuick() && option.equals("ring"))
-		{
-			swap("quick-start", option, target, true);
-		}
-		else if (config.swapQuick() && option.equals("pass"))
-		{
-			swap("quick-pass", option, target, true);
-			swap("quick pass", option, target, true);
-		}
-		else if (config.swapQuick() && option.equals("open"))
-		{
-			swap("quick-open", option, target, true);
-		}
-		else if (config.swapAdmire() && option.equals("admire"))
+		if (config.swapTeleports() && option.equals("remove") && target.startsWith("crafting cape"))
 		{
 			swap("teleport", option, target, true);
-			swap("spellbook", option, target, true);
-			swap("perks", option, target, true);
 		}
-		else if (config.swapPrivate() && option.equals("shared"))
+		if (config.swapPouches() && (target.equals("giant pouch") ||
+			target.equals("large pouch") ||
+			target.equals("medium pouch") ||
+			target.equals("small pouch")))
 		{
-			swap("private", option, target, true);
-		}
-		else if (config.swapPick() && option.equals("pick"))
-		{
-			swap("pick-lots", option, target, true);
-		}
-		else if (config.shiftClickCustomization() && shiftModifier && !option.equals("use"))
-		{
-			Integer customOption = getSwapConfig(eventId);
-
-			if (customOption != null && customOption == -1)
+			if(option.equals("fill"))
 			{
-				swap("use", option, target, true);
+				swap("empty", option, target, true);
 			}
-		}
-		// Put all item-related swapping after shift-click
-		else if (config.swapTeleportItem() && option.equals("wear"))
-		{
-			swap("rub", option, target, true);
-			swap("teleport", option, target, true);
-		}
-		else if (option.equals("wield"))
-		{
-			if (config.swapTeleportItem())
-			{
-				swap("teleport", option, target, true);
-			}
-		}
-		else if (config.swapBones() && option.equals("bury"))
-		{
-			swap("use", option, target, true);
+			else
+				if(option.equals("deposit-all"))
+				{
+					swapWithdraw("fill", option, target, true);
+				}
 		}
 	}
 
@@ -646,6 +328,10 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if (option != null)
 		{
 			itemComposition.setShiftClickActionIndex(option);
+
+			// Update our cached item composition too
+			ItemComposition ourItemComposition = itemManager.getItemComposition(itemComposition.getId());
+			ourItemComposition.setShiftClickActionIndex(option);
 		}
 	}
 
@@ -702,6 +388,17 @@ public class MenuEntrySwapperPlugin extends Plugin
 		}
 	}
 
+	private void swapWithdraw(String optionA, String optionB, String target, boolean strict)
+	{
+		MenuEntry[] entries = client.getMenuEntries();
+		MenuEntry fill = entries[2];
+
+		entries[2] = entries[9];
+		entries[9] = fill;
+		client.setMenuEntries(entries);
+
+	}
+
 	private void removeShiftClickCustomizationMenus()
 	{
 		menuManager.removeManagedCustomMenu(FIXED_INVENTORY_TAB_CONFIGURE);
@@ -727,5 +424,10 @@ public class MenuEntrySwapperPlugin extends Plugin
 			menuManager.addManagedCustomMenu(RESIZABLE_BOTTOM_LINE_INVENTORY_TAB_CONFIGURE);
 			menuManager.addManagedCustomMenu(RESIZABLE_INVENTORY_TAB_CONFIGURE);
 		}
+	}
+
+	Collection<WidgetItem> getInventoryItems()
+	{
+		return Collections.unmodifiableCollection(client.getWidget(WidgetInfo.INVENTORY).getWidgetItems());
 	}
 }

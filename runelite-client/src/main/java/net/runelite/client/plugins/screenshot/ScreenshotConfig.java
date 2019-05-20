@@ -197,4 +197,15 @@ public interface ScreenshotConfig extends Config
 	{
 		return Keybind.NOT_SET;
 	}
+
+	@ConfigItem(
+		keyName = "infernoScout",
+		name = "Inferno Scout",
+		description = "asd",
+		position = 13
+	)
+	default boolean infernoScout()
+	{
+		return false;
+	}
 }

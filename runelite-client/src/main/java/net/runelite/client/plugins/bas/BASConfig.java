@@ -33,12 +33,23 @@ import net.runelite.client.config.ConfigItem;
 public interface BASConfig extends Config
 {
 	@ConfigItem(
-			keyName = "basFeature",
-			name = "BAS Customers",
-			description = "asd"
+			keyName = "autoUpdateQueue",
+			name = "Queue Auto-updater",
+			description = "Automatically updates the BAS Queue"
 	)
-	default boolean basFeature()
+	default boolean autoUpdateQueue()
 	{
 		return true;
 	}
+
+	@ConfigItem(
+			keyName = "premNotifier",
+			name = "Premium Notifier",
+			description = "Notify if a Premium customer comes online/offline"
+	)
+	default boolean premNotifier()
+	{
+		return true;
+	}
+
 }

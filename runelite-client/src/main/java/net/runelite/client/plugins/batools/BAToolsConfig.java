@@ -33,9 +33,9 @@ import net.runelite.client.config.ConfigItem;
 public interface BAToolsConfig extends Config
 {
 	@ConfigItem(
-			keyName = "defTimer",
-			name = "Defender Tick Timer",
-			description = "Shows the current cycle tick of runners."
+		keyName = "defTimer",
+		name = "Defender Tick Timer",
+		description = "Shows the current cycle tick of runners."
 	)
 	default boolean defTimer()
 	{
@@ -43,9 +43,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "calls",
-			name = "Remove Incorrect Calls",
-			description = "Remove incorrect calls."
+		keyName = "calls",
+		name = "Remove Incorrect Calls",
+		description = "Remove incorrect calls."
 	)
 	default boolean calls()
 	{
@@ -53,9 +53,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "swapLadder",
-			name = "Swap ladder option",
-			description = "Swap Climb-down with Quick-start in the wave lobbies"
+		keyName = "swapLadder",
+		name = "Swap ladder option",
+		description = "Swap Climb-down with Quick-start in the wave lobbies"
 	)
 	default boolean swapLadder()
 	{
@@ -73,9 +73,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "healerMenuOption",
-			name = "Healer menu options",
-			description = "asd"
+		keyName = "healerMenuOption",
+		name = "Healer menu options",
+		description = "Shows time since last food placed on healer"
 	)
 	default boolean healerMenuOption()
 	{
@@ -83,9 +83,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "antiDrag",
-			name = "Anti Drag",
-			description = "asd"
+		keyName = "antiDrag",
+		name = "Anti Drag",
+		description = "asd"
 	)
 	default boolean antiDrag()
 	{
@@ -93,9 +93,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "antiDragDelay",
-			name = "Anti Drag Delay",
-			description = "asd"
+		keyName = "antiDragDelay",
+		name = "Anti Drag Delay",
+		description = "Similar to antidrag plugin but does not require shift to be help down"
 	)
 	default int antiDragDelay()
 	{
@@ -103,9 +103,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "eggBoi",
-			name = "Collector helper",
-			description = "asd"
+		keyName = "eggBoi",
+		name = "Collector helper",
+		description = "asd"
 	)
 	default boolean eggBoi()
 	{
@@ -113,9 +113,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "osHelp",
-			name = "Shift OS",
-			description = "asd"
+		keyName = "osHelp",
+		name = "Shift OS",
+		description = "Hold shift to only pick up correct eggs"
 	)
 	default boolean osHelp()
 	{
@@ -123,9 +123,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "prayerMetronome",
-			name = "Prayer Metronome",
-			description = "asd"
+		keyName = "prayerMetronome",
+		name = "Prayer Metronome",
+		description = "Similar to metronome plugin but only activates when a prayer is active"
 	)
 	default boolean prayerMetronome()
 	{
@@ -133,9 +133,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "prayerMetronomeVolume",
-			name = "Prayer Metronome Volume",
-			description = "asd"
+		keyName = "prayerMetronomeVolume",
+		name = "Prayer Metronome Volume",
+		description = "asd"
 	)
 	default int prayerMetronomeVolume()
 	{
@@ -143,9 +143,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "attackStyles",
-			name = "Attack Styles",
-			description = "asd"
+		keyName = "attackStyles",
+		name = "Attack Styles",
+		description = "Remove incorrect attack styles for hally/claws and if shift held down = all attack options are removed to help walk to the correct tiles"
 	)
 	default boolean attackStyles()
 	{
@@ -172,5 +172,25 @@ public interface BAToolsConfig extends Config
 			description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
 	default boolean removeHealWrongFood() { return false; }
+
+	@ConfigItem(
+		keyName = "tagging",
+		name = "Attack Tags",
+		description = "Highlights the menu entry of an attacker/ranger that has not been tagged."
+	)
+	default boolean tagging()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "ctrlHealer",
+			name = "Control Healer",
+			description = "Hold ctrl to put last healer clicked on top"
+	)
+	default boolean ctrlHealer()
+	{
+		return false;
+	}
 
 }

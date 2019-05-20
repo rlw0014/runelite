@@ -1,5 +1,8 @@
 /*
+<<<<<<< HEAD
  * Copyright (c) 2018, Cameron <https://github.com/noremac201>
+=======
+>>>>>>> Jacob/cs
  * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
  * All rights reserved.
  *
@@ -28,8 +31,15 @@ package net.runelite.client.plugins.bas;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.IOException;
+import java.io.StringReader;
+import net.runelite.http.api.RuneLiteAPI;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -60,6 +70,7 @@ public class BASPlugin extends Plugin
 {
 	private List<String[]> csvContent = new ArrayList<>();
 	private List<String> premList = new ArrayList<>();
+	private Widget[] members = new Widget[0];
 	private int count;
 
 	@Inject
@@ -87,6 +98,7 @@ public class BASPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		readCSV();
+		count=0;
 	}
 
 	@Override
@@ -100,106 +112,80 @@ public class BASPlugin extends Plugin
 	{
 		if(count!=client.getClanChatCount())
 		{
-			checkCustomers();
-		}
-	}
-
-	@Subscribe
-	public void onClanChanged(ClanChanged changed) throws Exception
-	{
-
-		if(client.getWidget(WidgetInfo.CLAN_CHAT_OWNER)==null)
-		{
-			return;
-		}
-
-		Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-		if(owner.getText().equals("<col=ffffff>Ba Services</col>"))
-		{
 			readCSV();
+			updateQueue();
 		}
-
-		count=0;
+		count=members.length==0?0:client.getClanChatCount();
+		checkCustomers();
 	}
 
 	private void checkCustomers()
 	{
-		if (config.basFeature())
+		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
+		if (clanChatTitleWidget != null)
 		{
-			Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
-			if (clanChatTitleWidget != null)
+			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
+			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
+			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
 			{
-				Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
-				Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-				if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
+				members = clanChatList.getDynamicChildren();
+				for (Widget member : members)
 				{
-					Widget[] members = clanChatList.getDynamicChildren();
-					for (Widget member : members)
-					{
-						if (member.getTextColor() == 16777215)
-						{
-							for (String[] user : csvContent)
-							{
-								if (user[1].toLowerCase().contains(member.getText().toLowerCase()))
-								{
-									switch(user[2])
-									{
-										case "":
-											member.setText(member.getText() + " (U)");
-											break;
-										case "Online":
-											member.setText(member.getText() + " (O)");
-											break;
-										case "In Progress":
-											member.setText(member.getText() + " (P)");
-											break;
-									}
-									if (user[0].equals("P"))
-									{
-										member.setTextColor(6604900);
-										boolean inList = false;
-										for (String prem : premList)
-										{
-											if (member.getText().toLowerCase().contains(prem.toLowerCase()))
-											{
-												inList = true;
-											}
+					if (member.getTextColor() == 16777215) {
+						for (String[] user : csvContent) {
+							if (user[1].toLowerCase().contains(member.getText().toLowerCase())) {
+								switch (user[2]) {
+									case "":
+										member.setText(member.getText() + " (U)");
+										break;
+									case "Online":
+										member.setText(member.getText() + " (O)");
+										break;
+									case "In Progress":
+										member.setText(member.getText() + " (P)");
+										break;
+								}
+								if (user[0].equals("P")) {
+									member.setTextColor(6604900);
+									boolean inList = false;
+									for (String prem : premList) {
+										if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
+											inList = true;
 										}
-										if (!inList)
+									}
+									if (!inList) {
+										premList.add(member.getText());
+										final String chatMessage = new ChatMessageBuilder()
+												.append(ChatColorType.NORMAL)
+												.append("Premium leech " + member.getText())
+												.append(ChatColorType.HIGHLIGHT)
+												.append(" online.")
+												.build();
+										if(config.premNotifier())
 										{
-											premList.add(member.getText());
-											final String chatMessage = new ChatMessageBuilder()
-													.append(ChatColorType.NORMAL)
-													.append("Premium leech " + member.getText())
-													.append(ChatColorType.HIGHLIGHT)
-													.append(" online.")
-													.build();
 											chatMessageManager.queue(QueuedMessage.builder()
 													.type(ChatMessageType.CONSOLE)
 													.runeLiteFormattedMessage(chatMessage)
 													.build());
 										}
 									}
-									else
-									{
-										member.setTextColor(6579400);
-									}
+								} else {
+									member.setTextColor(6579400);
 								}
 							}
 						}
 					}
-					for (String prem : premList)
-					{
+				}
+				if(premList.size()>0)
+				{
+					for (String prem : premList) {
 						boolean online = false;
-						for (Widget member : members)
-						{
-							if(member.getText().toLowerCase().contains(prem.toLowerCase()))
-							{
+						for (Widget member : members) {
+							if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
 								online = true;
 							}
 						}
-						if(!online)
-						{
+						if (!online) {
 							premList.remove(prem);
 							final String chatMessage = new ChatMessageBuilder()
 									.append(ChatColorType.NORMAL)
@@ -207,10 +193,13 @@ public class BASPlugin extends Plugin
 									.append(ChatColorType.HIGHLIGHT)
 									.append(" offline.")
 									.build();
-							chatMessageManager.queue(QueuedMessage.builder()
-									.type(ChatMessageType.CONSOLE)
-									.runeLiteFormattedMessage(chatMessage)
-									.build());
+							if(config.premNotifier())
+							{
+								chatMessageManager.queue(QueuedMessage.builder()
+										.type(ChatMessageType.CONSOLE)
+										.runeLiteFormattedMessage(chatMessage)
+										.build());
+							}
 						}
 					}
 				}
@@ -218,19 +207,147 @@ public class BASPlugin extends Plugin
 		}
 	}
 
-	private void readCSV() throws Exception
+	private void checkPrem()
 	{
-		String st = "https://docs.google.com/spreadsheets/d/1Jh9Nj6BvWVgzZ9urnTTNniQLkgprx_TMggaz8gt_iDM/export?format=csv";
-		URL stockURL = new URL(st);
-		BufferedReader in = new BufferedReader(new InputStreamReader(stockURL.openStream()));
-		String s;
-		csvContent.clear();
-		while ((s = in.readLine()) != null)
+		if (premList.size() > 0)
 		{
-			String[] splitString = s.split(",");
-			if(splitString.length>1)
+			for (String prem : premList)
 			{
-				csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
+				boolean online = false;
+				for (Widget member : members)
+				{
+					if (member.getText().toLowerCase().contains(prem.toLowerCase()))
+					{
+						online = true;
+					}
+				}
+				if (!online)
+				{
+					premList.remove(prem);
+					final String chatMessage = new ChatMessageBuilder()
+							.append(ChatColorType.NORMAL)
+							.append("Premium leech " + prem)
+							.append(ChatColorType.HIGHLIGHT)
+							.append(" offline.")
+							.build();
+					if (config.premNotifier())
+					{
+						chatMessageManager.queue(QueuedMessage.builder()
+								.type(ChatMessageType.CONSOLE)
+								.runeLiteFormattedMessage(chatMessage)
+								.build());
+					}
+				}
+			}
+		}
+	}
+
+	private void readCSV()
+	{
+		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+
+		HttpUrl httpUrl = new HttpUrl.Builder()
+				.scheme("https")
+				.host("docs.google.com")
+				.addPathSegment("spreadsheets")
+				.addPathSegment("d")
+				.addPathSegment("1Jh9Nj6BvWVgzZ9urnTTNniQLkgprx_TMggaz8gt_iDM")
+				.addPathSegment("export")
+				.addQueryParameter("format", "csv")
+				.build();
+
+		Request request = new Request.Builder()
+				.header("User-Agent", "RuneLite")
+				.url(httpUrl)
+				.build();
+
+
+		httpClient.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				log.warn("Error sending http request.", e.getMessage());
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				BufferedReader in = new BufferedReader(new StringReader(response.body().string()));
+				String s;
+				csvContent.clear();
+				while ((s = in.readLine()) != null)
+				{
+					String[] splitString = s.split(",");
+					csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
+				}
+			}
+		});
+	}
+
+	private void updateQueue()
+	{
+		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
+		if (clanChatTitleWidget != null) {
+			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
+			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
+			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
+			{
+					String csv = "";
+				for (Widget member : members)
+				{
+					if (member.getTextColor() != 16777060 && member.getTextColor()!=0 && member.getTextColor()!=901389)
+					{
+						String memberName = member.getText();
+
+						if(memberName.contains("("))
+						{
+							memberName = memberName.split(" \\(")[0];
+						}
+						if(csv.equals(""))
+						{
+							csv = memberName;
+						}
+						else
+						{
+							csv = csv + "," + memberName;
+						}
+					}
+				}
+				if(csv.equals(""))
+				{
+					return;
+				}
+
+				OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+				HttpUrl httpUrl = new HttpUrl.Builder()
+						.scheme("http")
+						.host("blairm.net")
+						.addPathSegment("bas")
+						.addPathSegment("update.php")
+						.addQueryParameter("d", csv)
+						.build();
+
+				Request request = new Request.Builder()
+						.header("User-Agent", "RuneLite")
+						.url(httpUrl)
+						.build();
+
+				log.info("sending: " +httpUrl.toString());
+
+				httpClient.newCall(request).enqueue(new Callback()
+				{
+					@Override
+					public void onFailure(Call call, IOException e)
+					{
+						log.warn("Error sending http request.", e.getMessage());
+					}
+
+					@Override
+					public void onResponse(Call call, Response response) throws IOException
+					{
+					}
+				});
 			}
 		}
 	}
