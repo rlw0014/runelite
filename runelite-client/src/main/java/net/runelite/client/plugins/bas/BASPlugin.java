@@ -204,41 +204,6 @@ public class BASPlugin extends Plugin
 		}
 	}
 
-	private void checkPrem()
-	{
-		if (premList.size() > 0)
-		{
-			for (String prem : premList)
-			{
-				boolean online = false;
-				for (Widget member : members)
-				{
-					if (member.getText().toLowerCase().contains(prem.toLowerCase()))
-					{
-						online = true;
-					}
-				}
-				if (!online)
-				{
-					premList.remove(prem);
-					final String chatMessage = new ChatMessageBuilder()
-							.append(ChatColorType.NORMAL)
-							.append("Premium leech " + prem)
-							.append(ChatColorType.HIGHLIGHT)
-							.append(" offline.")
-							.build();
-					if (config.premNotifier())
-					{
-						chatMessageManager.queue(QueuedMessage.builder()
-								.type(ChatMessageType.CONSOLE)
-								.runeLiteFormattedMessage(chatMessage)
-								.build());
-					}
-				}
-			}
-		}
-	}
-
 	private void readCSV()
 	{
 		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
