@@ -281,7 +281,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			counter.setCount(tickNum);
 			if (config.defTimer())
 			{
-				//log.info("" + tickNum++);
+				log.info("" + tickNum++);
 			}
 		}
 
