@@ -109,7 +109,7 @@ public class BASPlugin extends Plugin
 	{
 		if(count!=client.getClanChatCount())
 		{
-			log.info("count: ");
+			log.info("count: " + count);
 			readCSV();
 			updateQueue();
 		}
