@@ -109,6 +109,7 @@ public class BASPlugin extends Plugin
 	{
 		if(count!=client.getClanChatCount())
 		{
+			log.info("count: ");
 			readCSV();
 			updateQueue();
 		}
@@ -249,6 +250,11 @@ public class BASPlugin extends Plugin
 
 	private void updateQueue()
 	{
+		if(!config.autoUpdateQueue())
+		{
+			return;
+		}
+
 		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
 		if (clanChatTitleWidget != null) {
 			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
