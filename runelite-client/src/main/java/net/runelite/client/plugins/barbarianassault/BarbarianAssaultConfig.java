@@ -50,28 +50,12 @@ public interface BarbarianAssaultConfig extends Config
 	default boolean waveTimes() { return true; }
 
     @ConfigItem(
-        keyName = "showEggCountMessage",
-        name = "Show count of eggs collected as collector.",
-        description = "Display egg count as collector after each wave",
-        position = 2
-    )
-    default boolean showEggCount() { return false; }
-
-    @ConfigItem(
         keyName = "showEggCountOverlay",
         name = "Overlay of eggs counted",
         description = "Display current egg count as collector",
         position = 3
     )
     default boolean showEggCountOverlay() { return false; }
-
-    @ConfigItem(
-        keyName = "showHpCountMessage",
-        name = "Show count of Hp healed as healer.",
-        description = "Display healed count as healer after each wave",
-        position = 4
-    )
-    default boolean showHpCount() { return false; }
 
 	@ConfigItem(
 			keyName = "showHpCountOverlay",
@@ -134,14 +118,4 @@ public interface BarbarianAssaultConfig extends Config
 	{
 		return Color.GREEN;
 	}
-
-//	@ConfigItem(
-//			keyName = "testing",
-//			name = "Testing",
-//			description = "enables 'testing' keyword"
-//	)
-//	default boolean testing()
-//	{
-//		return false;
-//	}
 }
