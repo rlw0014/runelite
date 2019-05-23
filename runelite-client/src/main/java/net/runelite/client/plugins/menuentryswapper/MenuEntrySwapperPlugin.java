@@ -370,7 +370,10 @@ public class MenuEntrySwapperPlugin extends Plugin
 		{
 			return;
 		}
-
+		if (config.swapCollectorBag() & target.equals("collection bag"))
+		{
+			swap("empty", option, target, false);
+		}
 		if (config.shiftWalkHere() && shiftModifier &&
 				!option.equals("Stock-Up") && !option.equals("Take-Vial") &&
 				!option.equals("Take-Tofu") && !option.equals("Take-Worms") &&

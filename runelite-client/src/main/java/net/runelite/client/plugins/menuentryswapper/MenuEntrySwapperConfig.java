@@ -299,4 +299,14 @@ public interface MenuEntrySwapperConfig extends Config
 	{
 		return false;
 	}
+	@ConfigItem(
+			position = 20,
+			keyName = "swapCollectorBag",
+			name = "swaps collector bag in ba to empty left click",
+			description = "Make empty the left-click option on collector bag"
+	)
+	default boolean swapCollectorBag()
+    {
+	    return false;
+    }
 }
