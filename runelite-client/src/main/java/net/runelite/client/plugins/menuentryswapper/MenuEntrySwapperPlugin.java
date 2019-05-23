@@ -55,6 +55,7 @@ import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.barbarianassault.BarbarianAssaultPlugin;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -370,6 +371,10 @@ public class MenuEntrySwapperPlugin extends Plugin
 		{
 			return;
 		}
+		if (config.swapDestroyEggs() & (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
+        {
+            swap("destroy", option, target, false);
+        }
 		if (config.swapCollectorBag() & target.equals("collection bag"))
 		{
 			swap("empty", option, target, false);

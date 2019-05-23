@@ -299,6 +299,7 @@ public interface MenuEntrySwapperConfig extends Config
 	{
 		return false;
 	}
+
 	@ConfigItem(
 			position = 20,
 			keyName = "swapCollectorBag",
@@ -307,6 +308,17 @@ public interface MenuEntrySwapperConfig extends Config
 	)
 	default boolean swapCollectorBag()
     {
-	    return false;
+        return false;
+    }
+
+    @ConfigItem(
+            position = 21,
+            keyName = "swapDestroyEggs",
+            name = "Left click destroy eggs in BA",
+            description = "Make destroy the left-click option for collector eggs"
+    )
+    default boolean swapDestroyEggs()
+    {
+        return false;
     }
 }
