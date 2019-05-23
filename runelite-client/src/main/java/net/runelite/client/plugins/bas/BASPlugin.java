@@ -26,7 +26,8 @@ package net.runelite.client.plugins.bas;
 
 import java.io.IOException;
 
-import net.runelite.api.events.ClanMemberJoined;
+import net.runelite.api.events.*;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
@@ -47,7 +48,6 @@ import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatColorType;
-import net.runelite.api.events.GameTick;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
@@ -55,6 +55,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.api.ClanMember;
 
 
 @Slf4j
@@ -67,8 +68,10 @@ public class BASPlugin extends Plugin
 {
 	private List<String[]> csvContent = new ArrayList<>();
 	private List<String> premList = new ArrayList<>();
-	private Widget[] members = new Widget[0];
-	private int count;
+	private List<String> ccPremList = new ArrayList<>();
+	private List<String> ccMembers = new ArrayList<>();
+	private Widget[] membersWidgets = new Widget[0];
+	private int lastCheckTick;
 
 	@Inject
 	private Client client;
@@ -95,39 +98,119 @@ public class BASPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		readCSV();
-		count=0;
-	}
-
-	@Override
-	protected void shutDown()
-	{
-		count=0;
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		if(count!=client.getClanChatCount())
-		{
-			log.info("count: ");
-			readCSV();
-			updateQueue();
-		}
-		count=members.length==0?0:client.getClanChatCount();
 		checkCustomers();
 	}
 
-	private void checkCustomers()
+    @Subscribe
+    public void onClanMemberJoined(ClanMemberJoined event)
+    {
+        readCSV();
+		checkUsers();
+        updateQueue();
+    }
+
+    @Subscribe
+    public void onClanMemberLeft(ClanMemberLeft event)
+    {
+        readCSV();
+		checkUsers();
+        updateQueue();
+    }
+
+    @Subscribe
+    public void onClanChanged(ClanChanged event)
+    {
+    	log.info("Clan changed");
+        if (event.isJoined())
+        {
+            readCSV();
+			checkUsers();
+            updateQueue();
+        }
+    }
+    
+    private void checkUsers()
 	{
-		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
-		if (clanChatTitleWidget != null)
+		for (ClanMember memberCM : client.getClanMembers())
+		{
+			String member = memberCM.getUsername();
+
+			for (String[] user : csvContent)
+			{
+				if (user[1].toLowerCase().contains(member.toLowerCase()))
+				{
+					if(user[0].equals("P"))
+					{
+						if(!ccPremList.contains(member))
+						{
+							ccPremList.add(member);
+							final String chatMessage = new ChatMessageBuilder()
+									.append(ChatColorType.NORMAL)
+									.append("Premium leech " + member)
+									.append(ChatColorType.HIGHLIGHT)
+									.append(" online.")
+									.build();
+							if(config.premNotifier())
+							{
+								chatMessageManager.queue(QueuedMessage.builder()
+										.type(ChatMessageType.CONSOLE)
+										.runeLiteFormattedMessage(chatMessage)
+										.build());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (String premMember : ccPremList)
+		{
+			boolean isOnline = false;
+			for (ClanMember memberCM : client.getClanMembers())
+			{
+				String member = memberCM.getUsername();
+				if (premMember.equals(member))
+				{
+					isOnline = true;
+				}
+			}
+			if (!isOnline)
+			{
+				ccPremList.remove(premMember);
+				final String chatMessage = new ChatMessageBuilder()
+						.append(ChatColorType.NORMAL)
+						.append("Premium leech " + premMember)
+						.append(ChatColorType.HIGHLIGHT)
+						.append(" offline.")
+						.build();
+				if (config.premNotifier())
+				{
+					chatMessageManager.queue(QueuedMessage.builder()
+							.type(ChatMessageType.CONSOLE)
+							.runeLiteFormattedMessage(chatMessage)
+							.build());
+				}
+			}
+		}
+	}
+
+    private void checkCustomers()
+	{
+		Widget clanChatWidget = client.getWidget(WidgetInfo.CLAN_CHAT);
+
+		if (clanChatWidget != null && !clanChatWidget.isHidden())
 		{
 			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
 			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
 			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
 			{
-				members = clanChatList.getDynamicChildren();
-				for (Widget member : members)
+				membersWidgets = clanChatList.getDynamicChildren();
+				for (Widget member : membersWidgets)
 				{
 					if (member.getTextColor() == 16777215) {
 						for (String[] user : csvContent) {
@@ -143,97 +226,16 @@ public class BASPlugin extends Plugin
 										member.setText(member.getText() + " (P)");
 										break;
 								}
-								if (user[0].equals("P")) {
+								if (user[0].equals("P"))
+								{
 									member.setTextColor(6604900);
-									boolean inList = false;
-									for (String prem : premList) {
-										if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
-											inList = true;
-										}
-									}
-									if (!inList) {
-										premList.add(member.getText());
-										final String chatMessage = new ChatMessageBuilder()
-												.append(ChatColorType.NORMAL)
-												.append("Premium leech " + member.getText())
-												.append(ChatColorType.HIGHLIGHT)
-												.append(" online.")
-												.build();
-										if(config.premNotifier())
-										{
-											chatMessageManager.queue(QueuedMessage.builder()
-													.type(ChatMessageType.CONSOLE)
-													.runeLiteFormattedMessage(chatMessage)
-													.build());
-										}
-									}
-								} else {
+								}
+								else
+								{
 									member.setTextColor(6579400);
 								}
 							}
 						}
-					}
-				}
-				if(premList.size()>0)
-				{
-					for (String prem : premList) {
-						boolean online = false;
-						for (Widget member : members) {
-							if (member.getText().toLowerCase().contains(prem.toLowerCase())) {
-								online = true;
-							}
-						}
-						if (!online) {
-							premList.remove(prem);
-							final String chatMessage = new ChatMessageBuilder()
-									.append(ChatColorType.NORMAL)
-									.append("Premium leech " + prem)
-									.append(ChatColorType.HIGHLIGHT)
-									.append(" offline.")
-									.build();
-							if(config.premNotifier())
-							{
-							chatMessageManager.queue(QueuedMessage.builder()
-									.type(ChatMessageType.CONSOLE)
-									.runeLiteFormattedMessage(chatMessage)
-									.build());
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void checkPrem()
-	{
-		if (premList.size() > 0)
-		{
-			for (String prem : premList)
-			{
-				boolean online = false;
-				for (Widget member : members)
-				{
-					if (member.getText().toLowerCase().contains(prem.toLowerCase()))
-					{
-						online = true;
-					}
-				}
-				if (!online)
-				{
-					premList.remove(prem);
-					final String chatMessage = new ChatMessageBuilder()
-							.append(ChatColorType.NORMAL)
-							.append("Premium leech " + prem)
-							.append(ChatColorType.HIGHLIGHT)
-							.append(" offline.")
-							.build();
-					if (config.premNotifier())
-					{
-						chatMessageManager.queue(QueuedMessage.builder()
-								.type(ChatMessageType.CONSOLE)
-								.runeLiteFormattedMessage(chatMessage)
-								.build());
 					}
 				}
 			}
@@ -285,76 +287,68 @@ public class BASPlugin extends Plugin
 
 	private void updateQueue()
 	{
-		if(!config.autoUpdateQueue())
+		if(!config.autoUpdateQueue() || lastCheckTick == client.getTickCount())
 		{
 			return;
 		}
+		log.info("Updating queue");
+
+		lastCheckTick = client.getTickCount();
 
 		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
-		if (clanChatTitleWidget != null) {
-			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
-			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
-			{
-					String csv = "";
+		if (clanChatTitleWidget != null)
+		{
+            Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
+            if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
+            {
+                String csv = "";
 
-					for (Widget member : members)
+                for (ClanMember member : client.getClanMembers())
+                {
+                    String memberName = member.getUsername();
+					if (csv.equals(""))
 					{
-						if (member.getTextColor() != 16777060 && member.getTextColor()!=0 && member.getTextColor()!=901389)
-						{
-							String memberName = member.getText();
-
-							if(memberName.contains("("))
-							{
-								memberName = memberName.split(" \\(")[0];
-							}
-							if(csv.equals(""))
-							{
-								csv = memberName;
-							}
-							else
-							{
-								csv = csv + "," + memberName;
-							}
-						}
+						csv = memberName;
 					}
-					if(csv.equals(""))
+					else
 					{
-						return;
+						csv = csv + "," + memberName;
 					}
+				}
+                if (csv.equals("")) 
+                {
+                    return;
+                }
 
-					OkHttpClient httpClient = RuneLiteAPI.CLIENT;
-					HttpUrl httpUrl = new HttpUrl.Builder()
-							.scheme("http")
-							.host("blairm.net")
-							.addPathSegment("bas")
-							.addPathSegment("update.php")
-							.addQueryParameter("d", csv)
-							.build();
+                OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+                HttpUrl httpUrl = new HttpUrl.Builder()
+                        .scheme("http")
+                        .host("blairm.net")
+                        .addPathSegment("bas")
+                        .addPathSegment("update.php")
+                        .addQueryParameter("d", csv)
+                        .build();
 
-					Request request = new Request.Builder()
-							.header("User-Agent", "RuneLite")
-							.url(httpUrl)
-							.build();
+                Request request = new Request.Builder()
+                        .header("User-Agent", "RuneLite")
+                        .url(httpUrl)
+                        .build();
 
-					log.info("sending: " +httpUrl.toString());
+                log.info("sending: " + httpUrl.toString());
 
-					httpClient.newCall(request).enqueue(new Callback()
+                httpClient.newCall(request).enqueue(new Callback()
+				{
+                    @Override
+                    public void onFailure(Call call, IOException e)
 					{
-						@Override
-						public void onFailure(Call call, IOException e)
-						{
-							log.warn("Error sending http request.", e.getMessage());
-						}
+                        log.warn("Error sending http request.", e.getMessage());
+                    }
 
-						@Override
-						public void onResponse(Call call, Response response) throws IOException
-						{
-						}
-					});
-
-
-			}
-		}
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                    }
+                });
+            }
+        }
 	}
 }
