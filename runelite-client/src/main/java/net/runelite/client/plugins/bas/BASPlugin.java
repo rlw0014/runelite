@@ -25,9 +25,6 @@
 package net.runelite.client.plugins.bas;
 
 import java.io.IOException;
-
-import net.runelite.api.events.*;
-import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
@@ -45,6 +42,9 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ClanMemberJoined;
+import net.runelite.api.events.ClanMemberLeft;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatColorType;
@@ -66,12 +66,12 @@ import net.runelite.api.ClanMember;
 )
 public class BASPlugin extends Plugin
 {
+	private static String ccName = "Ba Services"; //make sure space ascii is correct
 	private List<String[]> csvContent = new ArrayList<>();
-	private List<String> premList = new ArrayList<>();
 	private List<String> ccPremList = new ArrayList<>();
-	private List<String> ccMembers = new ArrayList<>();
 	private Widget[] membersWidgets = new Widget[0];
 	private int lastCheckTick;
+	private int ccCount;
 
 	@Inject
 	private Client client;
@@ -100,39 +100,48 @@ public class BASPlugin extends Plugin
 		readCSV();
 	}
 
+	@Override
+	protected void shutDown() throws Exception
+	{
+		readCSV();
+		ccPremList.clear();
+		csvContent.clear();
+	}
+
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
 		checkCustomers();
+		if(ccCount!=client.getClanChatCount())
+		{
+			ccUpdate();
+			ccCount=client.getClanChatCount();
+		}
 	}
 
     @Subscribe
     public void onClanMemberJoined(ClanMemberJoined event)
     {
-        readCSV();
-		checkUsers();
-        updateQueue();
+		ccUpdate();
     }
 
     @Subscribe
     public void onClanMemberLeft(ClanMemberLeft event)
     {
-        readCSV();
-		checkUsers();
-        updateQueue();
+		ccUpdate();
     }
 
-    @Subscribe
-    public void onClanChanged(ClanChanged event)
-    {
-    	log.info("Clan changed");
-        if (event.isJoined())
-        {
-            readCSV();
-			checkUsers();
-            updateQueue();
-        }
-    }
+    private void ccUpdate()
+	{
+		if(lastCheckTick==client.getTickCount())
+		{
+			return;
+		}
+		readCSV();
+		checkUsers();
+		updateQueue();
+		lastCheckTick=client.getTickCount();
+	}
     
     private void checkUsers()
 	{
@@ -207,7 +216,7 @@ public class BASPlugin extends Plugin
 		{
 			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
 			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
+			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>"+ccName+"</col>"))
 			{
 				membersWidgets = clanChatList.getDynamicChildren();
 				for (Widget member : membersWidgets)
@@ -287,68 +296,56 @@ public class BASPlugin extends Plugin
 
 	private void updateQueue()
 	{
-		if(!config.autoUpdateQueue() || lastCheckTick == client.getTickCount())
+		if(!config.autoUpdateQueue() || lastCheckTick == client.getTickCount() || !client.getClanOwner().equals(ccName))
 		{
 			return;
 		}
-		log.info("Updating queue");
 
 		lastCheckTick = client.getTickCount();
-
-		Widget clanChatTitleWidget = client.getWidget(WidgetInfo.CLAN_CHAT_TITLE);
-		if (clanChatTitleWidget != null)
+		String csv = "";
+		for (ClanMember member : client.getClanMembers())
 		{
-            Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-            if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
-            {
-                String csv = "";
+			String memberName = member.getUsername();
+			if (csv.equals(""))
+			{
+				csv = memberName;
+			}
+			else
+			{
+				csv = csv + "," + memberName;
+			}
+		}
+		if (csv.equals(""))
+		{
+			return;
+		}
 
-                for (ClanMember member : client.getClanMembers())
-                {
-                    String memberName = member.getUsername();
-					if (csv.equals(""))
-					{
-						csv = memberName;
-					}
-					else
-					{
-						csv = csv + "," + memberName;
-					}
-				}
-                if (csv.equals("")) 
-                {
-                    return;
-                }
+		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+		HttpUrl httpUrl = new HttpUrl.Builder()
+				.scheme("http")
+				.host("blairm.net")
+				.addPathSegment("bas")
+				.addPathSegment("update.php")
+				.addQueryParameter("d", csv)
+				.build();
 
-                OkHttpClient httpClient = RuneLiteAPI.CLIENT;
-                HttpUrl httpUrl = new HttpUrl.Builder()
-                        .scheme("http")
-                        .host("blairm.net")
-                        .addPathSegment("bas")
-                        .addPathSegment("update.php")
-                        .addQueryParameter("d", csv)
-                        .build();
+		Request request = new Request.Builder()
+				.header("User-Agent", "RuneLite")
+				.url(httpUrl)
+				.build();
 
-                Request request = new Request.Builder()
-                        .header("User-Agent", "RuneLite")
-                        .url(httpUrl)
-                        .build();
+		log.info("sending: " + httpUrl.toString());
 
-                log.info("sending: " + httpUrl.toString());
+		httpClient.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				log.warn("Error sending http request.", e.getMessage());
+			}
 
-                httpClient.newCall(request).enqueue(new Callback()
-				{
-                    @Override
-                    public void onFailure(Call call, IOException e)
-					{
-                        log.warn("Error sending http request.", e.getMessage());
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                    }
-                });
-            }
-        }
+			@Override
+			public void onResponse(Call call, Response response) throws IOException { }
+		});
 	}
 }
