@@ -216,7 +216,7 @@ public class BASPlugin extends Plugin
 		{
 			Widget clanChatList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
 			Widget owner = client.getWidget(WidgetInfo.CLAN_CHAT_OWNER);
-			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>"+ccName+"</col>"))
+			if (client.getClanChatCount() > 0 && owner.getText().equals("<col=ffffff>Ba Services</col>"))
 			{
 				membersWidgets = clanChatList.getDynamicChildren();
 				for (Widget member : membersWidgets)
