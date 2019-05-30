@@ -36,7 +36,6 @@ import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
-import net.runelite.api.kit.KitType;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Varbits;
@@ -385,7 +384,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 		if (isUnderPlayer(itemDespawned.getTile()))
 		{
-			if (client.getLocalPlayer().getPlayerComposition().getEquipmentId(KitType.CAPE) == ItemID.COLLECTOR_ICON)
+			if (overlay.getCurrentRound().getRoundRole() == Role.COLLECTOR)
 			{
 				positiveEggCount++;
 				if (positiveEggCount > 60)
