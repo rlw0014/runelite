@@ -39,13 +39,8 @@ import net.runelite.api.events.*;
 import net.runelite.api.kit.KitType;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemID;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
@@ -191,27 +186,49 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		if (event.getGroupId() == WidgetID.BA_REWARD_GROUP_ID)
+		Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+		Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
+		if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
+				&& config.showSummaryOfPoints() && !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
 		{
 			wave = new Wave(client);
-			Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-			if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
-			{
-				if (config.waveTimes())
-					announceTime("Game finished, duration: ", gameTime.getTime(false));
-				if (config.showTotalRewards())
+			wave.setWaveAmounts();
+			wave.setWavePoints();
+			game.getWaves().add(wave);
+			announceSomething(wave.getWaveSummary());
+		}
+		switch (event.getGroupId())
+		{
+			case WidgetID.BA_REWARD_GROUP_ID:
 				{
+				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null) {
+					announceTime("Game finished, duration: ", gameTime.getTime(false));
+					gameTime = null;
+				}
+				if (config.showTotalRewards()) {
 					announceSomething(game.getGameSummary());
 				}
 			}
-			Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
-			if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
-					&& config.showSummaryOfPoints() && !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
+			break;
+			case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
-				wave.setWaveAmounts();
-				wave.setWavePoints();
-				game.getWaves().add(wave);
-				announceSomething(wave.getWaveSummary());
+				overlay.setCurrentRound(new Round(Role.ATTACKER));
+				break;
+			}
+			case WidgetID.BA_DEFENDER_GROUP_ID:
+			{
+				overlay.setCurrentRound(new Round(Role.DEFENDER));
+				break;
+			}
+			case WidgetID.BA_HEALER_GROUP_ID:
+			{
+				overlay.setCurrentRound(new Round(Role.HEALER));
+				break;
+			}
+			case WidgetID.BA_COLLECTOR_GROUP_ID:
+			{
+				overlay.setCurrentRound(new Round(Role.COLLECTOR));
+				break;
 			}
 		}
 	}
