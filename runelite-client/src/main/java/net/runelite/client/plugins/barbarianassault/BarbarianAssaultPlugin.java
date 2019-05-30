@@ -190,7 +190,7 @@ public class BarbarianAssaultPlugin extends Plugin
 
 	private void setOverlayRound(Role role)
 	{
-		if(overlay.getCurrentRound() != null)
+		if (overlay.getCurrentRound() != null)
 		{
 			return;
 		}
