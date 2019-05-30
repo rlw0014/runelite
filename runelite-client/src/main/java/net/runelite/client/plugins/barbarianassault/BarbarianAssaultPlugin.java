@@ -36,7 +36,6 @@ import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
-import net.runelite.api.kit.KitType;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Varbits;
@@ -186,28 +185,34 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-		Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
-		if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
-				&& config.showSummaryOfPoints() && !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
-		{
-			wave = new Wave(client);
-			wave.setWaveAmounts();
-			wave.setWavePoints();
-			game.getWaves().add(wave);
-			announceSomething(wave.getWaveSummary());
-		}
 		switch (event.getGroupId())
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
+			{
+				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
+					&& !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
 				{
-				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null) {
+					wave = new Wave(client);
+					wave.setWaveAmounts();
+					wave.setWavePoints();
+					game.getWaves().add(wave);
+					if (config.showSummaryOfPoints())
+					{
+						announceSomething(wave.getWaveSummary());
+					}
+				}
+				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+				{
 					announceTime("Game finished, duration: ", gameTime.getTime(false));
 					gameTime = null;
+                    if (config.showTotalRewards())
+                    {
+                        announceSomething(game.getGameSummary());
+                    }
 				}
-				if (config.showTotalRewards()) {
-					announceSomething(game.getGameSummary());
-				}
+
 			}
 			break;
 			case WidgetID.BA_ATTACKER_GROUP_ID:
@@ -296,43 +301,6 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 	}
 
-    @Subscribe
-	public void onItemContainerChanged(final ItemContainerChanged event)
-	{
-		if (event.getItemContainer() != client.getItemContainer(InventoryID.EQUIPMENT))
-		{
-			return;
-		}
-		if (overlay.getCurrentRound() != null)
-		{
-			return;
-		}
-
-		final Item[] items = event.getItemContainer().getItems();
-
-		// Check that the local player is wearing enough items to be wearing a cape.
-		if (items == null || items.length <= EquipmentInventorySlot.CAPE.getSlotIdx())
-		{
-			return;
-		}
-
-		switch (items[EquipmentInventorySlot.CAPE.getSlotIdx()].getId())
-		{
-			case ItemID.ATTACKER_ICON:
-				overlay.setCurrentRound(new Round(Role.ATTACKER));
-				break;
-			case ItemID.COLLECTOR_ICON:
-				overlay.setCurrentRound(new Round(Role.COLLECTOR));
-				break;
-			case ItemID.DEFENDER_ICON:
-				overlay.setCurrentRound(new Round(Role.DEFENDER));
-				break;
-			case ItemID.HEALER_ICON:
-				overlay.setCurrentRound(new Round(Role.HEALER));
-				break;
-		}
-	}
-
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
@@ -398,7 +366,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 		if (isUnderPlayer(itemDespawned.getTile()))
 		{
-			if (client.getLocalPlayer().getPlayerComposition().getEquipmentId(KitType.CAPE) == ItemID.COLLECTOR_ICON)
+			if (overlay.getCurrentRound().getRoundRole() == Role.COLLECTOR)
 			{
 				positiveEggCount++;
 				if (positiveEggCount > 60)
