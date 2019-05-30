@@ -126,22 +126,22 @@ public class BarbarianAssaultPlugin extends Plugin
 			}
 			case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.ATTACKER));
+				setOverlayRound(Role.ATTACKER);
 				break;
 			}
 			case WidgetID.BA_DEFENDER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.DEFENDER));
+				setOverlayRound(Role.DEFENDER);
 				break;
 			}
 			case WidgetID.BA_HEALER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.HEALER));
+				setOverlayRound(Role.HEALER);
 				break;
 			}
 			case WidgetID.BA_COLLECTOR_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.COLLECTOR));
+				setOverlayRound(Role.COLLECTOR);
 				break;
 			}
 		}
@@ -186,6 +186,16 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 
 		inGameBit = inGame;
+	}
+
+	private void setOverlayRound(Role role)
+	{
+		if(overlay.getCurrentRound() != null)
+		{
+			return;
+		}
+
+		overlay.setCurrentRound(new Round(role));
 	}
 
 	private void announceTime(String preText, String time)
