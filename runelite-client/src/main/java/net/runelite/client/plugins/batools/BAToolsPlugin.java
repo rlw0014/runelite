@@ -353,6 +353,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
+
 		if (config.calls() && getWidget() != null && event.getTarget().endsWith("horn") && !event.getTarget().contains("Unicorn"))
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
@@ -408,7 +409,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 						(
 								(entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu"))
 								&&
-								entry.getOption().equals("Use")
+										(entry.getOption().equals("Use")||entry.getOption().equals("Cancel"))
 						)
 				)
 				{
@@ -416,8 +417,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				}
 				else
 				{
-					log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use")) + " "+((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")) );
+					//log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use")) + " "+((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")) );
 				}
+				//log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use"))+ " " + ((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")));
+				//log.info("Entry identifier = "+ entry.getIdentifier() + "Entry target = "+entry.getTarget());
 			}
 			if (correctHealer != null)
 			{
@@ -536,6 +539,12 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		if (config.healerMenuOption() && target.contains("Penance Healer") && target.contains("<col=ff9040>Poisoned") && target.contains("->"))
+		{
+			foodPressed.put(event.getId(), Instant.now());
+			lastHealer = event.getId();
+			log.info("Last healer changed: " + lastHealer);
+		}
+		if (config.healerMenuOption() && target.contains("Crate") && target.contains("<col=ff9040>Chisel") && target.contains("->"))
 		{
 			foodPressed.put(event.getId(), Instant.now());
 			lastHealer = event.getId();
