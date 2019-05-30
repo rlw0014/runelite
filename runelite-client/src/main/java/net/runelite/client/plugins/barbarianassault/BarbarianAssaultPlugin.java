@@ -110,7 +110,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		switch(event.getGroupId())
+		switch (event.getGroupId())
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
