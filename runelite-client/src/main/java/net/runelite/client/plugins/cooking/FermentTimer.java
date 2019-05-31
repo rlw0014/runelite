@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Jordan Atwood <jordan.atwood423@gmail.com>
+ * Copyright (c) 2019, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,45 +22,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.opponentinfo;
+package net.runelite.client.plugins.cooking;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+import java.awt.Color;
+import java.awt.Image;
+import java.time.Duration;
+import java.time.Instant;
+import net.runelite.client.plugins.Plugin;
+import net.runelite.client.ui.overlay.infobox.InfoBox;
 
-@ConfigGroup("opponentinfo")
-public interface OpponentInfoConfig extends Config
+final class FermentTimer extends InfoBox
 {
-	@ConfigItem(
-		keyName = "lookupOnInteraction",
-		name = "Lookup players on interaction",
-		description = "Display a combat stat comparison panel on player interaction. (follow, trade, challenge, attack, etc.)",
-		position = 0
-	)
-	default boolean lookupOnInteraction()
+	private static final Duration FERMENT_TIME = Duration.ofMillis(13_800);
+
+	private Instant fermentTime;
+
+	FermentTimer(Image image, Plugin plugin)
 	{
-		return false;
+		super(image, plugin);
+		reset();
 	}
 
-	@ConfigItem(
-		keyName = "hitpointsDisplayStyle",
-		name = "Hitpoints display style",
-		description = "Show opponent's hitpoints as a value (if known), percentage, or both",
-		position = 1
-	)
-	default HitpointsDisplayStyle hitpointsDisplayStyle()
+	@Override
+	public String getText()
 	{
-		return HitpointsDisplayStyle.HITPOINTS;
+		int seconds = timeUntilFerment();
+		return Integer.toString(seconds);
 	}
 
-	@ConfigItem(
-		keyName = "showOpponentsOpponent",
-		name = "Show opponent's opponent",
-		description = "Toggle showing opponent's opponent if within a multi-combat area",
-		position = 2
-	)
-	default boolean showOpponentsOpponent()
+	@Override
+	public Color getTextColor()
 	{
-		return true;
+		int seconds = timeUntilFerment();
+		return seconds <= 3 ? Color.RED : Color.WHITE;
+	}
+
+	@Override
+	public boolean cull()
+	{
+		int seconds = timeUntilFerment();
+		return seconds <= 0;
+	}
+
+	void reset()
+	{
+		fermentTime = Instant.now().plus(FERMENT_TIME);
+	}
+
+	private int timeUntilFerment()
+	{
+		return (int) Duration.between(Instant.now(), fermentTime).getSeconds();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Lucas C <lucas1757@gmail.com>
+ * Copyright (c) 2019, Sean Dewar <https://github.com/seandewar>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,19 +22,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.cooking;
+package net.runelite.client.plugins.opponentinfo;
 
-import java.time.Instant;
-import lombok.AccessLevel;
-import lombok.Getter;
-
-class FermentTimerSession
+public enum HitpointsDisplayStyle
 {
-	@Getter(AccessLevel.PACKAGE)
-	private Instant lastWineMakingAction;
-
-	void updateLastWineMakingAction()
-	{
-		this.lastWineMakingAction = Instant.now();
-	}
+	HITPOINTS,
+	PERCENTAGE,
+	BOTH;
 }
