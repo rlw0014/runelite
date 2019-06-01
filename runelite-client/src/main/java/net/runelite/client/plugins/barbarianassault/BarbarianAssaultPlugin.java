@@ -122,32 +122,6 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Inject
 	private BarbarianAssaultOverlay overlay;
 
-	private final ImmutableList<WidgetInfo> WIDGETS = ImmutableList.of(
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS,
-			WidgetInfo.BA_RUNNERS_PASSED,
-			WidgetInfo.BA_EGGS_COLLECTED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED,
-			WidgetInfo.BA_WRONG_POISON_PACKS,
-			WidgetInfo.BA_HONOUR_POINTS_REWARD
-	);
-	private final ImmutableList<WidgetInfo> POINTSWIDGETS = ImmutableList.of(
-			//base
-			WidgetInfo.BA_BASE_POINTS,
-			//att
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS_POINTS,
-			WidgetInfo.BA_RANGERS_KILLED,
-			WidgetInfo.BA_FIGHTERS_KILLED,
-			//def
-			WidgetInfo.BA_RUNNERS_PASSED_POINTS,
-			WidgetInfo.BA_RUNNERS_KILLED,
-			//coll
-			WidgetInfo.BA_EGGS_COLLECTED_POINTS,
-			//heal
-			WidgetInfo.BA_HEALERS_KILLED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
-			WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
-	);
-
     @Provides
 	BarbarianAssaultConfig provideConfig(ConfigManager configManager)
 	{
