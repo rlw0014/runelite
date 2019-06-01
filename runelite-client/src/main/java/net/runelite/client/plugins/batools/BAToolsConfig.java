@@ -174,6 +174,13 @@ public interface BAToolsConfig extends Config
 	default boolean removeHealWrongFood() { return false; }
 
 	@ConfigItem(
+			keyName = "removePenanceCave",
+			name = "Remove 'Block' Penance Cave",
+			description = "Removes unnecessary menu option, however Moon wanted it back"
+	)
+	default boolean removePenanceCave() { return false; }
+
+	@ConfigItem(
 		keyName = "tagging",
 		name = "Attack Tags",
 		description = "Highlights the menu entry of an attacker/ranger that has not been tagged."

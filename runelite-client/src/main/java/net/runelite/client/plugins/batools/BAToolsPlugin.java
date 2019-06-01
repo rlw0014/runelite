@@ -534,7 +534,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			{//remove attack option from everything but queen spawns
 				remove(option, target, true);
 			}
-			else if((option.equals("fix") || (option.equals("block") && target.equals("penance cave"))) && client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null)//if not defender
+			else if(config.removePenanceCave() && (option.equals("fix") || (option.equals("block") && target.equals("penance cave"))) && client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null)//if not defender
 			{//the check for option requires checking target as well because defensive attack style option is also called "block".
 				remove(option, target, true);
 			}
