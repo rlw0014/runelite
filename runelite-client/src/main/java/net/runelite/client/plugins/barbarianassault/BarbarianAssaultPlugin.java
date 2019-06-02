@@ -88,7 +88,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	private int totalHpHealed = 0;
 
 	private boolean hasAnnounced;
-    private Font font;
+	private Font font;
 	private final Image clockImage = ImageUtil.getResourceStreamFromClass(getClass(), "clock.png");
 	private int inGameBit = 0;
 	private String currentWave = START_WAVE;
@@ -122,40 +122,14 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Inject
 	private BarbarianAssaultOverlay overlay;
 
-	private final ImmutableList<WidgetInfo> WIDGETS = ImmutableList.of(
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS,
-			WidgetInfo.BA_RUNNERS_PASSED,
-			WidgetInfo.BA_EGGS_COLLECTED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED,
-			WidgetInfo.BA_WRONG_POISON_PACKS,
-			WidgetInfo.BA_HONOUR_POINTS_REWARD
-	);
-	private final ImmutableList<WidgetInfo> POINTSWIDGETS = ImmutableList.of(
-			//base
-			WidgetInfo.BA_BASE_POINTS,
-			//att
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS_POINTS,
-			WidgetInfo.BA_RANGERS_KILLED,
-			WidgetInfo.BA_FIGHTERS_KILLED,
-			//def
-			WidgetInfo.BA_RUNNERS_PASSED_POINTS,
-			WidgetInfo.BA_RUNNERS_KILLED,
-			//coll
-			WidgetInfo.BA_EGGS_COLLECTED_POINTS,
-			//heal
-			WidgetInfo.BA_HEALERS_KILLED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
-			WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
-	);
-
-    @Provides
+	@Provides
 	BarbarianAssaultConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(BarbarianAssaultConfig.class);
 	}
 
 	private Game game;
-    private Wave wave;
+	private Wave wave;
 
 	@Override
 	protected void startUp() throws Exception
@@ -167,7 +141,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		greenEggs = new HashMap<>();
 		blueEggs = new HashMap<>();
 		yellowEggs = new HashMap<>();
-    }
+	}
 
 	@Override
 	protected void shutDown() throws Exception
@@ -241,23 +215,6 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
-//		if (chatMessage.getMessage().toLowerCase().contains("testing"))
-//		{
-//			ArrayList<Wave> waves = new ArrayList<>();
-//			for (int i = 0; i < 1; i++)
-//			{
-//				Wave wave1 = new Wave(client);
-//				int[] amounts = {4, 0, 30, 10, 1, 38};
-//				int[] points = {-3, -2, 6, -4, -8, -11};
-//				int[] otherPoints = {38, 35, 33, 30};
-//				wave1.setWaveAmounts(amounts);
-//				wave1.setWavePoints(points, otherPoints);
-//				waves.add(wave1);
-//				announceSomething(wave1.getWaveSummary());
-//			}
-//			Game game1 = new Game(client, waves);
-//			announceSomething(game1.getGameSummary());
-//		}
 		if (chatMessage.getMessage().toLowerCase().startsWith("wave points"))
 		{
 			hasAnnounced = true;
