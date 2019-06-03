@@ -163,6 +163,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
+				log.info("Current wave test, wave: " + currentWave);
 				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
 				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
@@ -172,10 +173,16 @@ public class BarbarianAssaultPlugin extends Plugin
 					wave.setWaveAmounts();
 					wave.setWavePoints();
 					game.getWaves().add(wave);
+					log.info("test2"+wave.getWaveSummary());
 					if (config.showSummaryOfPoints())
 					{
 						announceSomething(wave.getWaveSummary());
 					}
+				}
+				else
+				{
+					log.info(""+ (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT)) + (pointsWidget != null)
+							+ !hasAnnounced + (client.getVar(Varbits.IN_GAME_BA) == 0));
 				}
 				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
