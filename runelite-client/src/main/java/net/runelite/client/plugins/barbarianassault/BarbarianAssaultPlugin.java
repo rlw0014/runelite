@@ -164,36 +164,31 @@ public class BarbarianAssaultPlugin extends Plugin
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
 				wave = new Wave(client);
-				log.info("Current wave test, wave: " + currentWave);
-                Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-//				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
-				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT)
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+				{
+					if (config.waveTimes())
+					{
+						announceTime("Game finished, duration: ", gameTime.getTime(false));
+						gameTime = null;
+					}
+					if (config.showTotalRewards())
+					{
+						announceSomething(game.getGameSummary());
+					}
+				}
+				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
+				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
 						&& !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
 				{
 					wave.setWaveAmounts();
 					wave.setWavePoints();
 					game.getWaves().add(wave);
-					log.info("test2"+wave.getWaveSummary());
 					if (config.showSummaryOfPoints())
 					{
 						announceSomething(wave.getWaveSummary());
 					}
 				}
-				else
-				{
-					log.info(""+ (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT))
-							+ !hasAnnounced + (client.getVar(Varbits.IN_GAME_BA) == 0));
-				}
-				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
-				{
-					announceTime("Game finished, duration: ", gameTime.getTime(false));
-					gameTime = null;
-                    if (config.showTotalRewards())
-                    {
-                        announceSomething(game.getGameSummary());
-                    }
-				}
-
 			}
 			break;
 			case WidgetID.BA_ATTACKER_GROUP_ID:
