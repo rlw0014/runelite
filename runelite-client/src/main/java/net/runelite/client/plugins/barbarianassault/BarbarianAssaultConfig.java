@@ -87,7 +87,7 @@ public interface BarbarianAssaultConfig extends Config
 			description = "Gives summary of advanced points breakdown in chat log",
 			position = 8
     )
-	default boolean showSummaryOfPoints() { return false; };
+	default boolean showSummaryOfPoints() { return false; }
 
 	@ConfigItem(
 			keyName = "wrongPoisonFoodTextColor",
