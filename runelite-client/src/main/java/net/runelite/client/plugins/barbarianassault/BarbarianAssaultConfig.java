@@ -79,7 +79,7 @@ public interface BarbarianAssaultConfig extends Config
 			description = "Displays total eggs/healed hp and missed attacks/lost runners",
 			position = 7
 	)
-	default boolean showTotalRewards(){ return false; };
+	default boolean showTotalRewards(){ return false; }
 
 	@ConfigItem(
 			keyName = "showSummaryOfPoints",
