@@ -198,18 +198,17 @@ public class BarbarianAssaultPlugin extends Plugin
 			}
 			case WidgetID.BA_DEFENDER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.DEFENDER));
+				setOverlayRound(Role.DEFENDER);
 				break;
 			}
 			case WidgetID.BA_HEALER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.HEALER));
+				setOverlayRound(Role.HEALER);
 				break;
 			}
 			case WidgetID.BA_COLLECTOR_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.COLLECTOR));
-				setOverlayRound(Role.DEFENDER);
+				setOverlayRound(Role.COLLECTOR);
 				break;
 			}
 		}
