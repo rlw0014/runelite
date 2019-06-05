@@ -11,6 +11,9 @@ import net.runelite.client.chat.ChatMessageManager;
 
 import javax.inject.Inject;
 import java.awt.*;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 
 @Getter
 class Wave
@@ -89,7 +92,7 @@ class Wave
     {
         for (int i = 0; i < childIDsOfWidgets.length; i++)
         {
-            Widget w = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, i);
+            Widget w = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, childIDsOfWidgets[i]);
             if (w != null)
             {
                 waveAmounts[i] = Integer.parseInt(w.getText());
