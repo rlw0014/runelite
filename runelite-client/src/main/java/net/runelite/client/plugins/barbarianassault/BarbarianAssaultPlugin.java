@@ -24,7 +24,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.runelite.client.plugins.barbarianassault;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.Font;
@@ -129,33 +128,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	@Inject
 	private BarbarianAssaultOverlay overlay;
 
-	private final ImmutableList<WidgetInfo> WIDGETS = ImmutableList.of(
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS,
-			WidgetInfo.BA_RUNNERS_PASSED,
-			WidgetInfo.BA_EGGS_COLLECTED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED,
-			WidgetInfo.BA_WRONG_POISON_PACKS,
-			WidgetInfo.BA_HONOUR_POINTS_REWARD
-	);
-	private final ImmutableList<WidgetInfo> POINTSWIDGETS = ImmutableList.of(
-			//base
-			WidgetInfo.BA_BASE_POINTS,
-			//att
-			WidgetInfo.BA_FAILED_ATTACKER_ATTACKS_POINTS,
-			WidgetInfo.BA_RANGERS_KILLED,
-			WidgetInfo.BA_FIGHTERS_KILLED,
-			//def
-			WidgetInfo.BA_RUNNERS_PASSED_POINTS,
-			WidgetInfo.BA_RUNNERS_KILLED,
-			//coll
-			WidgetInfo.BA_EGGS_COLLECTED_POINTS,
-			//heal
-			WidgetInfo.BA_HEALERS_KILLED,
-			WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
-			WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
-	);
-
-	@Provides
+    @Provides
 	BarbarianAssaultConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(BarbarianAssaultConfig.class);
@@ -196,25 +169,26 @@ public class BarbarianAssaultPlugin extends Plugin
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
-				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
+				log.info("Current wave test, wave: " + currentWave);
+
+				Widget pointsWidget = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, 14); //RUNNERS_PASSED
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-				if (rewardWidget == null)
-				{
-					return;
-				}
-				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
-					&& !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
+
+				if (pointsWidget != null && rewardWidget != null && !rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) &&
+						!hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
 				{
 					wave = new Wave(client);
 					wave.setWaveAmounts();
 					wave.setWavePoints();
 					game.getWaves().add(wave);
+					log.info("test2"+wave.getWaveSummary());
 					if (config.showSummaryOfPoints())
 					{
 						announceSomething(wave.getWaveSummary());
 					}
 				}
-				if (config.waveTimes() && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+
+				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
 					announceTime("Game finished, duration: ", gameTime.getTime(false));
 					gameTime = null;

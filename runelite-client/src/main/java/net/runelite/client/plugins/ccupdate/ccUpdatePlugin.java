@@ -6,8 +6,8 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.socket.client.IO;
-import io.socket.client.Socket;
+//import io.socket.client.IO;
+//import io.socket.client.Socket;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.ClanMember;
 import net.runelite.api.Client;
@@ -27,11 +27,11 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.json.JSONArray;
+//import org.json.JSONException;
+//import org.json.JSONObject;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -55,7 +55,7 @@ public class ccUpdatePlugin extends Plugin
 	private ChatMessageManager chatMessageManager;
 	private HashSet<ClanMember> previousMembersInClan;
 	private String clanChannelName;
-	private Socket socket;
+//	private Socket socket;
 
 	@Inject
 	private ccUpdateConfig config;
@@ -69,27 +69,27 @@ public class ccUpdatePlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		previousMembersInClan = null;
-		socket = IO.socket("https://baservicesserver.now.sh");
-		socket.on("new", objects -> {
-			JSONArray newRows = (JSONArray) objects[0];
-			for (int i = 0; i < newRows.length(); i++) {
-				try {
-					JSONObject obj = newRows.getJSONObject(i);
-					String value = obj.getString("premium");
-					if (config.premNotifier()) {
-						postChatMessage(value);
-					}
-				} catch (JSONException exception) {
-
-				}
-			}
-		});
-		socket.connect();
+//		socket = IO.socket("https://baservicesserver.now.sh");
+//		socket.on("new", objects -> {
+//			JSONArray newRows = (JSONArray) objects[0];
+//			for (int i = 0; i < newRows.length(); i++) {
+//				try {
+//					JSONObject obj = newRows.getJSONObject(i);
+//					String value = obj.getString("premium");
+//					if (config.premNotifier()) {
+//						postChatMessage(value);
+//					}
+//				} catch (JSONException exception) {
+//
+//				}
+//			}
+//		});
+//		socket.connect();
 	}
 
 	@Override
 	protected void shutDown() throws Exception {
-		socket.disconnect();
+//		socket.disconnect();
 	}
 
 	@Subscribe
