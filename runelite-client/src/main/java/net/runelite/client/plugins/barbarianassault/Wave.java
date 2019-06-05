@@ -6,10 +6,7 @@ import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatMessageBuilder;
-import net.runelite.client.chat.ChatMessageManager;
-
-import javax.inject.Inject;
-import java.awt.*;
+import java.awt.Color;
 
 @Getter
 class Wave
@@ -40,7 +37,6 @@ class Wave
             WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
             WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
     );
-
     private int[] waveAmounts = new int[6];
     private int[] allPointsList = new int[10];
     private int[] wavePoints = new int[6];
@@ -59,10 +55,12 @@ class Wave
             " C: ",
             " H: "
     };
+
     Wave(Client client)
     {
         this.client = client;
     }
+
     void setWaveAmounts(int[] amounts)
     {
         for (int i = 0; i < amounts.length; i++)
@@ -82,6 +80,7 @@ class Wave
             otherRolesPointsList[i] = otherRolesPoints[i];
         }
     }
+
     void setWaveAmounts()
     {
         for (int i = 0; i < WIDGETS.size(); i++)
@@ -93,6 +92,7 @@ class Wave
             }
         }
     }
+
     void setWavePoints()
     {
         for (int i = 0; i < POINTSWIDGETS.size(); i++)
@@ -118,7 +118,7 @@ class Wave
             }
         }
         wavePoints[5] = 0;
-        for (int i = 0; i < wavePoints.length-1; i++)
+        for (int i = 0; i < wavePoints.length - 1; i++)
         {
             wavePoints[5] += wavePoints[i];
         }
@@ -155,11 +155,12 @@ class Wave
             }
         }
     }
+
     ChatMessageBuilder getWaveSummary()
     {
         ChatMessageBuilder message = new ChatMessageBuilder();
         message.append("Wave points:");
-        for(int i = 0; i < descriptions.length; i++)
+        for (int i = 0; i < descriptions.length; i++)
         {
             if (i != 4)
             {
@@ -183,7 +184,7 @@ class Wave
         }
         message.append(System.getProperty("line.separator"));
         message.append("All roles points this wave: ");
-        for(int i = 0; i < otherPointsDescriptions.length; i++)
+        for (int i = 0; i < otherPointsDescriptions.length; i++)
         {
             message.append(otherPointsDescriptions[i]);
             message.append(String.valueOf(otherRolesPointsList[i]));

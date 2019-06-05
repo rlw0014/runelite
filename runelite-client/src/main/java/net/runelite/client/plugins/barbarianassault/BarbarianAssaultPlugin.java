@@ -29,13 +29,20 @@ import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.api.*;
+import net.runelite.api.MessageNode;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.ItemID;
+import net.runelite.api.Player;
+import net.runelite.api.Tile;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.*;
+import net.runelite.api.events.ItemSpawned;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Varbits;
@@ -88,7 +95,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	private int totalHpHealed = 0;
 
 	private boolean hasAnnounced;
-    private Font font;
+	private Font font;
 	private final Image clockImage = ImageUtil.getResourceStreamFromClass(getClass(), "clock.png");
 	private int inGameBit = 0;
 	private String currentWave = START_WAVE;
@@ -148,14 +155,14 @@ public class BarbarianAssaultPlugin extends Plugin
 			WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
 	);
 
-    @Provides
+	@Provides
 	BarbarianAssaultConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(BarbarianAssaultConfig.class);
 	}
 
 	private Game game;
-    private Wave wave;
+	private Wave wave;
 
 	@Override
 	protected void startUp() throws Exception
@@ -167,7 +174,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		greenEggs = new HashMap<>();
 		blueEggs = new HashMap<>();
 		yellowEggs = new HashMap<>();
-    }
+	}
 
 	@Override
 	protected void shutDown() throws Exception
@@ -191,6 +198,10 @@ public class BarbarianAssaultPlugin extends Plugin
 			{
 				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+				if (rewardWidget == null)
+				{
+					return;
+				}
 				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
 					&& !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
 				{
@@ -203,14 +214,14 @@ public class BarbarianAssaultPlugin extends Plugin
 						announceSomething(wave.getWaveSummary());
 					}
 				}
-				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+				if (config.waveTimes() && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
 					announceTime("Game finished, duration: ", gameTime.getTime(false));
 					gameTime = null;
-                    if (config.showTotalRewards())
-                    {
-                        announceSomething(game.getGameSummary());
-                    }
+					if (config.showTotalRewards())
+					{
+						announceSomething(game.getGameSummary());
+					}
 				}
 
 			}
@@ -239,7 +250,8 @@ public class BarbarianAssaultPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage) {
+	public void onChatMessage(ChatMessage chatMessage)
+	{
 		if (chatMessage.getMessage().toLowerCase().startsWith("wave points"))
 		{
 			hasAnnounced = true;
