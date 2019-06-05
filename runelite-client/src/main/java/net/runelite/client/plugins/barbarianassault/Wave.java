@@ -1,19 +1,12 @@
 package net.runelite.client.plugins.barbarianassault;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatMessageBuilder;
-import net.runelite.client.chat.ChatMessageManager;
-
-import javax.inject.Inject;
 import java.awt.*;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 
 @Getter
 class Wave
