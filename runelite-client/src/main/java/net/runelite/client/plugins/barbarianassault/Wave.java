@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
@@ -15,31 +16,33 @@ import java.awt.*;
 class Wave
 {
     private Client client;
-    private final ImmutableList<WidgetInfo> WIDGETS = ImmutableList.of(
-            WidgetInfo.BA_FAILED_ATTACKER_ATTACKS,
-            WidgetInfo.BA_RUNNERS_PASSED,
-            WidgetInfo.BA_EGGS_COLLECTED,
-            WidgetInfo.BA_HITPOINTS_REPLENISHED,
-            WidgetInfo.BA_WRONG_POISON_PACKS,
-            WidgetInfo.BA_HONOUR_POINTS_REWARD
-    );
-    private final ImmutableList<WidgetInfo> POINTSWIDGETS = ImmutableList.of(
-            //base
-            WidgetInfo.BA_BASE_POINTS,
-            //att
-            WidgetInfo.BA_FAILED_ATTACKER_ATTACKS_POINTS,
-            WidgetInfo.BA_RANGERS_KILLED,
-            WidgetInfo.BA_FIGHTERS_KILLED,
-            //def
-            WidgetInfo.BA_RUNNERS_PASSED_POINTS,
-            WidgetInfo.BA_RUNNERS_KILLED,
-            //coll
-            WidgetInfo.BA_EGGS_COLLECTED_POINTS,
-            //heal
-            WidgetInfo.BA_HEALERS_KILLED,
-            WidgetInfo.BA_HITPOINTS_REPLENISHED_POINTS,
-            WidgetInfo.BA_WRONG_POISON_PACKS_POINTS
-    );
+
+    //[0] BA_FAILED_ATTACKER_ATTACKS
+    //[1] BA_RUNNERS_PASSED
+    //[2] BA_EGGS_COLLECTED
+    //[3] BA_HITPOINTS_REPLENISHED
+    //[4] BA_WRONG_POISON_PACKS
+    //[5] BA_HONOUR_POINTS_REWARD
+
+    final int[] childIDsOfWidgets = new int[]{22, 14, 21, 19, 20, 49};
+
+    //base
+    //[0] BA_BASE_POINTS,
+    //att
+    //[1] BA_FAILED_ATTACKER_ATTACKS_POINTS,
+    //[2] BA_RANGERS_KILLED,
+    //[3] BA_FIGHTERS_KILLED,
+    //def
+    //[4] BA_RUNNERS_PASSED_POINTS,
+    //[5] BA_RUNNERS_KILLED,
+    //coll
+    //[6] BA_EGGS_COLLECTED_POINTS,
+    //heal
+    //[7] BA_HEALERS_KILLED,
+    //[8] BA_HITPOINTS_REPLENISHED_POINTS,
+    //[9] BA_WRONG_POISON_PACKS_POINTS
+
+    final int[] childIDsOfPointsWidgets = new int[]{33, 32, 25, 26, 24, 28, 31, 27, 29, 30};
 
     private int[] waveAmounts = new int[6];
     private int[] allPointsList = new int[10];
@@ -84,9 +87,9 @@ class Wave
     }
     void setWaveAmounts()
     {
-        for (int i = 0; i < WIDGETS.size(); i++)
+        for (int i = 0; i < childIDsOfWidgets.length; i++)
         {
-            Widget w = client.getWidget(WIDGETS.get(i));
+            Widget w = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, i);
             if (w != null)
             {
                 waveAmounts[i] = Integer.parseInt(w.getText());
@@ -95,9 +98,9 @@ class Wave
     }
     void setWavePoints()
     {
-        for (int i = 0; i < POINTSWIDGETS.size(); i++)
+        for (int i = 0; i < childIDsOfPointsWidgets.length; i++)
         {
-            Widget w = client.getWidget(POINTSWIDGETS.get(i));
+            Widget w = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, childIDsOfPointsWidgets[i]);
             allPointsList[i] = Integer.parseInt(w.getText());
             switch (i)
             {
@@ -122,9 +125,9 @@ class Wave
         {
             wavePoints[5] += wavePoints[i];
         }
-        for (int i = 0; i < POINTSWIDGETS.size(); i++)
+        for (int i = 0; i < childIDsOfPointsWidgets.length; i++)
         {
-            Widget w = client.getWidget(POINTSWIDGETS.get(i));
+            Widget w = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, childIDsOfPointsWidgets[i]);
             switch (i)
             {
                 case 0:
