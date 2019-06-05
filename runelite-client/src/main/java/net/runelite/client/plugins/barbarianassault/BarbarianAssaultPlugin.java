@@ -169,8 +169,6 @@ public class BarbarianAssaultPlugin extends Plugin
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
-				log.info("Current wave test, wave: " + currentWave);
-
 				Widget pointsWidget = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, 14); //RUNNERS_PASSED
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
 
@@ -181,7 +179,6 @@ public class BarbarianAssaultPlugin extends Plugin
 					wave.setWaveAmounts();
 					wave.setWavePoints();
 					game.getWaves().add(wave);
-					log.info("test2"+wave.getWaveSummary());
 					if (config.showSummaryOfPoints())
 					{
 						announceSomething(wave.getWaveSummary());
