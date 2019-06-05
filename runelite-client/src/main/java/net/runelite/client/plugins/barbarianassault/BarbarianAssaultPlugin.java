@@ -197,24 +197,24 @@ public class BarbarianAssaultPlugin extends Plugin
 
 			}
 			break;
-			case WidgetID.BA_ATTACKER_GROUP_ID:
+      case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.ATTACKER));
+				setOverlayRound(Role.ATTACKER);
 				break;
 			}
 			case WidgetID.BA_DEFENDER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.DEFENDER));
+				setOverlayRound(Role.DEFENDER);
 				break;
 			}
 			case WidgetID.BA_HEALER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.HEALER));
+				setOverlayRound(Role.HEALER);
 				break;
 			}
 			case WidgetID.BA_COLLECTOR_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.COLLECTOR));
+				setOverlayRound(Role.COLLECTOR);
 				break;
 			}
 		}
@@ -295,7 +295,10 @@ public class BarbarianAssaultPlugin extends Plugin
 			{
 				overlay.setCurrentRound(null);
 
-				if (config.waveTimes() && gameTime != null)
+				// Use an instance check to determine if this is exiting a game or a tutorial
+				// After exiting tutorials there is a small delay before changing IN_GAME_BA back to
+				// 0 whereas when in a real wave it changes while still in the instance.
+				if (config.waveTimes() && gameTime != null && client.isInInstancedRegion())
 				{
 					announceTime("Wave " + currentWave + " duration: ", gameTime.getTime(true));
 				}
@@ -506,6 +509,19 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 	}
 
+
+	private void setOverlayRound(Role role)
+	{
+		// Prevent changing roles when a role is already set, as widgets can be
+		// loaded multiple times in game from eg. opening and closing the horn
+		// of glory.
+		if (overlay.getCurrentRound() != null)
+		{
+			return;
+		}
+
+		overlay.setCurrentRound(new Round(role));
+	}
 
 	private void announceTime(String preText, String time)
 	{
