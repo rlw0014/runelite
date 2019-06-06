@@ -483,53 +483,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				else//remove "Light" option (and "Take" option if not defender).
 					remove("light", target, true);
 			}
-			else if(option.equals("use"))
-			{
-				if (config.removeHealWrongFood()) {
-					Widget healer = client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT);
-					if (healer != null) {
-						String item = target.split("-")[0].trim();
-						List<String> poison = Arrays.asList("poisoned tofu", "poisoned meat", "poisoned worms");
-						List<String> vials = Arrays.asList("healing vial", "healing vial(1)", "healing vial(2)", "healing vial(3)", "healing vial(4)");//"healing vial(4)"
-						if (poison.contains(item)) {//if item is a poison item
-							int calledPoison = 0;
-							switch (healer.getText())//choose which poison to hide the use/destroy option for
-							{
-								case "Pois. Tofu":
-									calledPoison = ItemID.POISONED_TOFU;
-									break;
-								case "Pois. Meat":
-									calledPoison = ItemID.POISONED_MEAT;
-									break;
-								case "Pois. Worms":
-									calledPoison = ItemID.POISONED_WORMS;
-									break;
-							}
-							System.out.println(target.equals(item));
-							if (target.equals(item))//if targeting the item itself
-							{
-								if (calledPoison != 0 && itemId != calledPoison)//if no call or chosen item is not the called one
-								{
-									remove(new String[]{"use", "destroy", "examine"}, target, true);//remove options
-								}
-							} else if (!target.contains("penance healer")) {
-								remove(option, target, true);
-							}
-						} else if (vials.contains(item))//if item is the healer's healing vial
-						{
-
-							if (!target.equals(item))//if target is not the vial itself
-							{
-
-								if (!target.contains("level") || target.contains("penance") || target.contains("queen spawn"))//if someone has "penance" or "queen spawn" in their name, gg...
-								{
-									remove(option, target, true);
-								}
-							}
-						}
-					}
-				}
-			}
 			else if(option.equals("attack") && client.getWidget(WidgetInfo.BA_ATK_ROLE_TEXT) == null && !target.equals("queen spawn"))//if not attacker
 			{//remove attack option from everything but queen spawns
 				remove(option, target, true);
@@ -726,7 +679,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 
-		if ((event.getTarget().contains("Penance Healer") || event.getTarget().contains("Penance Fighter") || event.getTarget().contains("Penance Ranger")))
+		if (config.healerGreenColor() && (event.getTarget().contains("Penance Healer")))
 		{
 
 			MenuEntry[] menuEntries = client.getMenuEntries();
