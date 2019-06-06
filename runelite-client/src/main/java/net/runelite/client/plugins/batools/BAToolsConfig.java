@@ -153,30 +153,30 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "removeBA",
-			name = "*Barbarian Assault Helper*",
-			description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+		keyName = "removeBA",
+		name = "*Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
 	default boolean removeBA() { return true; }
 
 	@ConfigItem(
-			keyName = "removeWrongEggs",
-			name = "Remove wrong eggs - *Barbarian Assault Helper*",
-			description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+		keyName = "removeWrongEggs",
+		name = "Remove wrong eggs - *Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
 	default boolean removeWrongEggs() { return false; }
 
 	@ConfigItem(
-			keyName = "removeWrongHealFood",
-			name = "Remove wrong Heal Food - *Barbarian Assault Helper*",
-			description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+		keyName = "removeWrongHealFood",
+		name = "Remove wrong Heal Food - *Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
 	default boolean removeHealWrongFood() { return false; }
 
 	@ConfigItem(
-			keyName = "removePenanceCave",
-			name = "Remove 'Block' Penance Cave",
-			description = "Removes unnecessary menu option, however Moon wanted it back"
+		keyName = "removePenanceCave",
+		name = "Remove 'Block' Penance Cave",
+		description = "Removes unnecessary menu option, however Moon wanted it back"
 	)
 	default boolean removePenanceCave() { return false; }
 
@@ -191,13 +191,23 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "ctrlHealer",
-			name = "Control Healer",
-			description = "Hold ctrl to put last healer clicked on top"
+		keyName = "ctrlHealer",
+		name = "Control Healer",
+		description = "Hold ctrl to put last healer clicked on top"
 	)
 	default boolean ctrlHealer()
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "healerGreenColor",
+		name = "Healer green menu option",
+		description = "Toggle healer's menu option as green"
+	)
+    default boolean healerGreenColor()
+    {
+	   return false;
+    }
 
 }
