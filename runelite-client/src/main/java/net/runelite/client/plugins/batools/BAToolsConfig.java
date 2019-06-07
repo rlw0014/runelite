@@ -210,4 +210,33 @@ public interface BAToolsConfig extends Config
 	   return false;
     }
 
+    @ConfigItem(
+		  keyName = "shiftWalkHere",
+		  name = "Shift-Click Walk here",
+		  description = "Make Walk here the left-click option when holding shift"
+    )
+    default boolean shiftWalkHere()
+    {
+	   return false;
+    }
+
+    @ConfigItem(
+		  keyName = "swapCollectorBag",
+		  name = "Swap left click collector bag to Empty",
+		  description = "Make empty the left-click option on collector bag 'Empty'"
+    )
+    default boolean swapCollectorBag()
+    {
+	   return false;
+    }
+
+    @ConfigItem(
+		  keyName = "swapDestroyEggs",
+		  name = "Swap left click destroy eggs in BA",
+		  description = "Make destroy the left-click option for collector eggs"
+    )
+    default boolean swapDestroyEggs()
+    {
+	   return false;
+    }
 }
