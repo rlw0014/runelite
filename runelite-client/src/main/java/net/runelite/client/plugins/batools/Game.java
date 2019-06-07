@@ -1,14 +1,12 @@
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.batools;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.eventbus.Subscribe;
-
-import java.awt.*;
-import java.util.ArrayList;
 
 
 @Getter
