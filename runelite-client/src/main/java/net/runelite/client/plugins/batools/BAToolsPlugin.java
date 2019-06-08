@@ -802,15 +802,8 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		if (config.highlightCollectorEggs())
+		if (config.highlightCollectorEggs() && overlay.getCurrentRound() != null && overlay.getCurrentRound().getRoundRole() == Role.COLLECTOR)
 		{
-			if (overlay.getCurrentRound() == null) {
-				return;
-			}
-			if (overlay.getCurrentRound().getRoundRole() != Role.COLLECTOR) {
-				return;
-			}
-
 			String calledEgg = getCollectorHeardCall();
 			String target = event.getTarget();
 			String option = event.getOption();
@@ -874,24 +867,24 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			swap("empty", option, target, false);
 		}
 		if (config.shiftWalkHere() && shiftDown && !event.getTarget().equals("<col=ffff>Healer item machine") &&
-		  !option.equals("Stock-Up") && !option.equals("Take-Vial") &&
-		  !option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
-		  !option.equals("Take-Meat") &&
-		  !target.contains("Nuff"))
+			   !option.equals("Stock-Up") && !option.equals("Take-Vial") &&
+			   !option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
+			   !option.equals("Take-Meat") &&
+			   !target.contains("Nuff"))
 		{
-			// Keep moving 'Walk here' to the end of the entries (left-click option)
+		// Keep moving 'Walk here' to the end of the entries (left-click option)
 		MenuEntry[] entries = client.getMenuEntries();
 		int walkIdx = searchIndex(entries, "Walk here", "", false);
-		if (walkIdx > 0 && walkIdx <= entries.length)
-		{
-		  MenuEntry walkHere = entries[walkIdx];
-		  MenuEntry currentTop = entries[entries.length - 1];
+			if (walkIdx > 0 && walkIdx <= entries.length)
+			{
+			  MenuEntry walkHere = entries[walkIdx];
+			  MenuEntry currentTop = entries[entries.length - 1];
 
-		  entries[walkIdx] = currentTop;
-		  entries[entries.length - 1] = walkHere;
+			  entries[walkIdx] = currentTop;
+			  entries[entries.length - 1] = walkHere;
 
-		  client.setMenuEntries(entries);
-		}
+			  client.setMenuEntries(entries);
+			}
 		}
 
 
@@ -1165,26 +1158,20 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			String[] currentCall = client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT).getText().split(" ");
 
-			if (!currentCall[0].contains("Pois."))
-			{
-				return;
-			}
+			if (currentCall[0].contains("Pois.")) {
+				MenuEntry[] menuEntries = client.getMenuEntries();
+				MenuEntry correctEgg = null;
+				entries.clear();
 
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			MenuEntry correctEgg = null;
-			entries.clear();
-
-			for (MenuEntry entry : menuEntries)
-			{
-				if (entry.getOption().equals("Take-" + currentCall[1]))
-				{
-					correctEgg = entry;
+				for (MenuEntry entry : menuEntries) {
+					if (entry.getOption().equals("Take-" + currentCall[1])) {
+						correctEgg = entry;
+					}
 				}
-			}
-			if (correctEgg != null)
-			{
-				entries.add(correctEgg);
-				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+				if (correctEgg != null) {
+					entries.add(correctEgg);
+					client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+				}
 			}
 		}
 
