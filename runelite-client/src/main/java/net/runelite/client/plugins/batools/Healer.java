@@ -40,15 +40,15 @@ public class Healer
 
 
 
-	public Healer(NPC npc, int spawnNumber, int wave)
+	public Healer(NPC npc, int spawnNumber, String wave)
 	{
 		this.npc = npc;
-		this.wave = wave;
+		this.wave = Integer.parseInt(wave);
 		this.spawnNumber = spawnNumber;
-		this.firstCallFood = getCode(wave).getFirstCallFood()[spawnNumber];
-		this.secondCallFood = getCode(wave).getSecondCallFood()[spawnNumber];
+		this.firstCallFood = getCode(Integer.parseInt(wave)).getFirstCallFood()[spawnNumber];
+		this.secondCallFood = getCode(Integer.parseInt(wave)).getSecondCallFood()[spawnNumber];
 		this.foodRemaining = firstCallFood + secondCallFood;
-		this.lastFoodTime = getCode(wave).getSpacing()[spawnNumber];
+		this.lastFoodTime = getCode(Integer.parseInt(wave)).getSpacing()[spawnNumber];
 	}
 
 	private HealerCode getCode(int wave)

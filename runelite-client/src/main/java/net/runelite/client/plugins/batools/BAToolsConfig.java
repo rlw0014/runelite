@@ -25,6 +25,7 @@
  */
 package net.runelite.client.plugins.batools;
 
+import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -32,6 +33,28 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("BATools")
 public interface BAToolsConfig extends Config
 {
+	@ConfigItem(
+		   keyName = "showTimer",
+		   name = "Show call change timer",
+		   description = "Show time to next call change",
+		   hidden = true
+	)
+	default boolean showTimer()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		   keyName = "waveTimes",
+		   name = "Show wave and game duration",
+		   description = "Displays wave and game duration",
+		   hidden = true
+	)
+	default boolean waveTimes()
+	{
+		return true;
+	}
+
 	@ConfigItem(
 		keyName = "defTimer",
 		name = "Defender Tick Timer",
@@ -238,5 +261,67 @@ public interface BAToolsConfig extends Config
     default boolean swapDestroyEggs()
     {
 	   return false;
+    }
+
+    @ConfigItem(
+		  keyName = "showEggCountOverlay",
+		  name = "Overlay of eggs counted",
+		  description = "Display current egg count as collector"
+    )
+    default boolean showEggCountOverlay() { return false; }
+
+    @ConfigItem(
+		  keyName = "showHpCountOverlay",
+		  name = "Overlay of Hp counted",
+		  description = "Display current healed count as healer"
+    )
+    default boolean showHpCountOverlay() { return false; }
+
+    @ConfigItem(
+		  keyName = "highlightCollectorEggs",
+		  name = "Highlight collector eggs",
+		  description = "Highlight called egg colors"
+    )
+    default boolean highlightCollectorEggs() { return false; }
+
+    @ConfigItem(
+		  keyName = "showTotalRewards",
+		  name = "Summarize total reward points",
+		  description = "Displays total eggs/healed hp and missed attacks/lost runners"
+    )
+    default boolean showTotalRewards(){ return false; }
+
+    @ConfigItem(
+		  keyName = "showSummaryOfPoints",
+		  name = "Display summary of advanced points",
+		  description = "Gives summary of advanced points breakdown in chat log"
+    )
+    default boolean showSummaryOfPoints() { return false; }
+
+    @ConfigItem(
+		  keyName = "wrongPoisonFoodTextColor",
+		  name = "Change healer wrong poison pack color",
+		  description = "Change healer wrong poison pack color"
+    )
+    default Color wrongPoisonFoodTextColor() { return Color.BLACK;}
+
+    @ConfigItem(
+		  keyName = "highlightItems",
+		  name = "Highlight called poison/bait",
+		  description = "Highlights the poison or bait that was called by your teammate"
+    )
+    default boolean highlightItems()
+    {
+	   return false;
+    }
+
+    @ConfigItem(
+		  keyName = "highlightColor",
+		  name = "Highlight color",
+		  description = "Configures the color to highlight the called poison/bait"
+    )
+    default Color highlightColor()
+    {
+	   return Color.GREEN;
     }
 }
