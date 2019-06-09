@@ -36,6 +36,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.GameState;
+import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import net.runelite.api.NPCComposition;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -49,6 +50,8 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.barbarianassault.BarbarianAssaultPlugin;
+import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
+import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.Overlay;
 import java.time.Duration;
@@ -93,6 +96,7 @@ public class BAToolsOverlay extends Overlay
 		this.client = client;
 		this.itemManager = itemManager;
 		this.plugin = plugin;
+		getMenuEntries().add(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "B.A. overlay"));
 	}
 
 

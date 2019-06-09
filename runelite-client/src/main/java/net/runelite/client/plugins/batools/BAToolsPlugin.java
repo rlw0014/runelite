@@ -335,9 +335,8 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 						announceSomething(game.getGameSummary());
 					}
 				}
-
+				break;
 			}
-			break;
 			case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
 				setOverlayRound(Role.ATTACKER);
@@ -894,7 +893,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 		if(config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
 		{
-			if(itemId == ItemID.LOGS && !target.contains("healing vial"))
+			if(target.equals("logs") || target.equals("hammer"))
 			{
 				if(client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null)
 					remove(new String[]{"take", "light"}, target, true);
