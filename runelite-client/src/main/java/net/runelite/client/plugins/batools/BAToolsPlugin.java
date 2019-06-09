@@ -308,17 +308,17 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			Widget callWidget = getWidget();
-			String call = Calls.getOption(callWidget.getText());
+			String call = callWidget.getText();
 			MenuEntry correctCall = null;
-
 			entries.clear();
+
 			for (MenuEntry entry : menuEntries)
 			{
-				if (option.equals(call))
+				if (entry.getOption().contains("Tell-") && call.toLowerCase().contains(entry.getOption().substring(5)))
 				{
 					correctCall = entry;
 				}
-				else if (!option.startsWith("Tell-"))
+				else if (!entry.getOption().startsWith("Tell-"))
 				{
 					entries.add(entry);
 				}
@@ -329,11 +329,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				entries.add(correctCall);
 				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
-		}
-		else if (config.calls() && event.getTarget().endsWith("horn") && inGameBit==1)
-		{
-			entries.clear();
-			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
 
 		//Ladder swap
@@ -363,8 +358,9 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				{
 					correctHealer = entry;
 				}
-				else
+				else if (!option.startsWith("use"))
 				{
+					entries.add(entry);
 					//log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use")) + " "+((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")) );
 				}
 				//log.info((entry.getIdentifier() == lastHealer  && entry.getOption().equals("Use"))+ " " + ((entry.getTarget().equals("<col=ff9040>Poisoned meat") || entry.getTarget().equals("<col=ff9040>Poisoned worms") || entry.getTarget().equals("<col=ff9040>Poisoned tofu")) && entry.getOption().equals("Use")));
@@ -473,7 +469,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
 		}
-
 	}
 
 	@Subscribe
