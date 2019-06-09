@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2019, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,29 +22,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.cache;
+package net.runelite.client.plugins.mining;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import net.runelite.api.coords.WorldPoint;
 
-public class CacheProperties
+@AllArgsConstructor
+@Getter
+class RockRespawn
 {
-	private static Properties getProperties() throws IOException
-	{
-		Properties properties = new Properties();
-		InputStream resourceAsStream = StoreLocation.class.getResourceAsStream("/cache.properties");
-		properties.load(resourceAsStream);
-		return properties;
-	}
-
-	public static int getRsVersion() throws IOException
-	{
-		return Integer.parseInt(getProperties().getProperty("rs.version"));
-	}
-
-	public static int getCacheVersion() throws IOException
-	{
-		return Integer.parseInt(getProperties().getProperty("cache.version"));
-	}
+	private final Rock rock;
+	private final WorldPoint worldPoint;
+	private final Instant startTime;
+	private final int respawnTime;
 }

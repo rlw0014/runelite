@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Jeremy Plsek <https://github.com/jplsek>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,29 +22,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.cache;
+package net.runelite.client.plugins.inventorygrid;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import net.runelite.client.config.Config;
+import net.runelite.client.config.ConfigGroup;
+import net.runelite.client.config.ConfigItem;
 
-public class CacheProperties
+@ConfigGroup("inventorygrid")
+public interface InventoryGridConfig extends Config
 {
-	private static Properties getProperties() throws IOException
+	@ConfigItem(
+		keyName = "showItem",
+		name = "Show item",
+		description = "Show a preview of the item in the new slot"
+	)
+	default boolean showItem()
 	{
-		Properties properties = new Properties();
-		InputStream resourceAsStream = StoreLocation.class.getResourceAsStream("/cache.properties");
-		properties.load(resourceAsStream);
-		return properties;
+		return true;
 	}
 
-	public static int getRsVersion() throws IOException
+	@ConfigItem(
+		keyName = "showGrid",
+		name = "Show grid",
+		description = "Show a grid on the inventory while dragging"
+	)
+	default boolean showGrid()
 	{
-		return Integer.parseInt(getProperties().getProperty("rs.version"));
+		return true;
 	}
 
-	public static int getCacheVersion() throws IOException
+	@ConfigItem(
+		keyName = "showHighlight",
+		name = "Highlight background",
+		description = "Show a green background highlight on the new slot"
+	)
+	default boolean showHighlight()
 	{
-		return Integer.parseInt(getProperties().getProperty("cache.version"));
+		return true;
 	}
 }

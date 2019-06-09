@@ -119,6 +119,7 @@ public class BarbarianAssaultPlugin extends Plugin
 				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
 					announceTime("Game finished, duration: ", gameTime.getTime(false));
+					gameTime = null;
 				}
 
 				break;
@@ -177,6 +178,9 @@ public class BarbarianAssaultPlugin extends Plugin
 			{
 				overlay.setCurrentRound(null);
 
+				// Use an instance check to determine if this is exiting a game or a tutorial
+				// After exiting tutorials there is a small delay before changing IN_GAME_BA back to
+				// 0 whereas when in a real wave it changes while still in the instance.
 				if (config.waveTimes() && gameTime != null && client.isInInstancedRegion())
 				{
 					announceTime("Wave " + currentWave + " duration: ", gameTime.getTime(true));
@@ -189,6 +193,9 @@ public class BarbarianAssaultPlugin extends Plugin
 
 	private void setOverlayRound(Role role)
 	{
+		// Prevent changing roles when a role is already set, as widgets can be
+		// loaded multiple times in game from eg. opening and closing the horn
+		// of glory.
 		if (overlay.getCurrentRound() != null)
 		{
 			return;
