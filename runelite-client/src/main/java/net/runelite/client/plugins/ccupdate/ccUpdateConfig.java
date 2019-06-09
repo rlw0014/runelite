@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Cameron <https://github.com/noremac201>
+ * Copyright (c) 2018, Ryan <https://github.com/rlw0014>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,54 +22,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.ccupdate;
 
-import lombok.Getter;
+import net.runelite.client.config.Config;
+import net.runelite.client.config.ConfigGroup;
+import net.runelite.client.config.ConfigItem;
 
-import java.util.HashMap;
-import java.util.Map;
-@Getter
-public enum Calls
-{   //Attacker Calls
-	RED_EGG("Red egg", "Tell-red"),
-	GREEN_EGG("Green egg", "Tell-green"),
-	BLUE_EGG("Blue egg", "Tell-blue"),
-	//Collector Calls
-	CONTROLLED("Controlled/Bullet/Wind", "Tell-controlled"),
-	ACCURATE("Accurate/Field/Water", "Tell-accurate"),
-	AGGRESSIVE("Aggressive/Blunt/Earth", "Tell-aggressive"),
-	DEFENSIVE("Defensive/Barbed/Fire", "Tell-defensive"),
-	//Healer Calls
-	TOFU("Tofu", "Tell-tofu"),
-	CRACKERS("Crackers", "Tell-crackers"),
-	WORMS("Worms", "Tell-worms"),
-	//Defender Calls
-	POIS_WORMS("Pois. Worms", "Tell-worms"),
-	POIS_TOFU("Pois. Tofu", "Tell-tofu"),
-	POIS_MEAT("Pois. Meat", "Tell-meat");
-
-	private final String call;
-	private final String option;
-
-	private static final Map<String, String> CALL_MENU = new HashMap<>();
-
-	static
-	{
-		for (Calls s : values())
-		{
-			CALL_MENU.put(s.getCall(), s.getOption());
-		}
+@ConfigGroup("ccUpdate")
+public interface ccUpdateConfig extends Config
+{
+	@ConfigItem(
+			keyName = "premNotifier",
+			name = "Toggle Premium Notifier",
+			description = "Enables or Disables a notification when a customer is added to queue as premium."
+	)
+	default boolean premNotifier() {
+		return true;
 	}
-
-	Calls(String call, String option)
-	{
-		this.call = call;
-		this.option = option;
-	}
-
-	public static String getOption(String call)
-	{
-		return CALL_MENU.get(call);
-	}
-
 }

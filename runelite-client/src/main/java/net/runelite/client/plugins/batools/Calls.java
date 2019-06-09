@@ -22,15 +22,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.batools;
 
 import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
 @Getter
 public enum Calls
-{   //Attacker Calls
+{
+	//Attacker Calls
 	RED_EGG("Red egg", "Tell-red"),
 	GREEN_EGG("Green egg", "Tell-green"),
 	BLUE_EGG("Blue egg", "Tell-blue"),
