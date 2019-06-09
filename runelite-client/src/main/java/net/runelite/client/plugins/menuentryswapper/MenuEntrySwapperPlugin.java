@@ -372,9 +372,9 @@ public class MenuEntrySwapperPlugin extends Plugin
 			return;
 		}
 		if (config.swapDestroyEggs() & (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
-        {
-            swap("destroy", option, target, false);
-        }
+    {
+      swap("destroy", option, target, false);
+    }
 		if (config.swapCollectorBag() & target.equals("collection bag"))
 		{
 			swap("empty", option, target, false);
@@ -382,13 +382,8 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if (config.shiftWalkHere() && shiftModifier &&
 				!option.equals("Stock-Up") && !option.equals("Take-Vial") &&
 				!option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
-				!option.equals("Take-Meat"))
-		{
-			// Keep moving 'Walk here' to the end of the entries (left-click option)
-			MenuEntry[] entries = client.getMenuEntries();
-			int walkIdx = searchIndex(entries, "Walk here", "", false);
-
-			if (walkIdx > 0 && walkIdx <= entries.length)
+				!option.equals("Take-Meat") &&
+	    	!target.contains("nuff"))
 			{
 				MenuEntry walkHere = entries[walkIdx];
 				MenuEntry currentTop = entries[entries.length - 1];
