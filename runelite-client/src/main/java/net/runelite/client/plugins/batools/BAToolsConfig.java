@@ -231,13 +231,14 @@ public interface BAToolsConfig extends Config
 	{
 		return false;
 	}
+	@ConfigItem(
 		keyName = "healerGreenColor",
 		name = "Healer green menu option",
 		description = "Toggle healer's menu option as green"
 	)
-    default boolean healerGreenColor()
-    {
-	   return false;
-    }
+    	default boolean healerGreenColor()
+    	{
+	   	return false;
+    	}
 
 }
