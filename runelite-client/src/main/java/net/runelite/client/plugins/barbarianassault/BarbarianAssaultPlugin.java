@@ -163,52 +163,34 @@ public class BarbarianAssaultPlugin extends Plugin
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
-				wave = new Wave(client);
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+
+				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
-					if (config.waveTimes())
-					{
-						announceTime("Game finished, duration: ", gameTime.getTime(false));
-						gameTime = null;
-					}
-					if (config.showTotalRewards())
-					{
-						announceSomething(game.getGameSummary());
-					}
+					announceTime("Game finished, duration: ", gameTime.getTime(false));
+					gameTime = null;
 				}
-				Widget pointsWidget = client.getWidget(WidgetInfo.BA_RUNNERS_PASSED);
-				if (!rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && pointsWidget != null
-						&& !hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
-				{
-					wave.setWaveAmounts();
-					wave.setWavePoints();
-					game.getWaves().add(wave);
-					if (config.showSummaryOfPoints())
-					{
-						announceSomething(wave.getWaveSummary());
-					}
-				}
+
+				break;
 			}
-			break;
 			case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.ATTACKER));
+				setOverlayRound(Role.ATTACKER);
 				break;
 			}
 			case WidgetID.BA_DEFENDER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.DEFENDER));
+				setOverlayRound(Role.DEFENDER);
 				break;
 			}
 			case WidgetID.BA_HEALER_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.HEALER));
+				setOverlayRound(Role.HEALER);
 				break;
 			}
 			case WidgetID.BA_COLLECTOR_GROUP_ID:
 			{
-				overlay.setCurrentRound(new Round(Role.COLLECTOR));
+				setOverlayRound(Role.COLLECTOR);
 				break;
 			}
 		}
@@ -288,7 +270,10 @@ public class BarbarianAssaultPlugin extends Plugin
 			{
 				overlay.setCurrentRound(null);
 
-				if (config.waveTimes() && gameTime != null)
+				// Use an instance check to determine if this is exiting a game or a tutorial
+				// After exiting tutorials there is a small delay before changing IN_GAME_BA back to
+				// 0 whereas when in a real wave it changes while still in the instance.
+				if (config.waveTimes() && gameTime != null && client.isInInstancedRegion())
 				{
 					announceTime("Wave " + currentWave + " duration: ", gameTime.getTime(true));
 				}
@@ -499,6 +484,19 @@ public class BarbarianAssaultPlugin extends Plugin
 		}
 	}
 
+
+	private void setOverlayRound(Role role)
+	{
+		// Prevent changing roles when a role is already set, as widgets can be
+		// loaded multiple times in game from eg. opening and closing the horn
+		// of glory.
+		if (overlay.getCurrentRound() != null)
+		{
+			return;
+		}
+
+		overlay.setCurrentRound(new Round(role));
+	}
 
 	private void announceTime(String preText, String time)
 	{
