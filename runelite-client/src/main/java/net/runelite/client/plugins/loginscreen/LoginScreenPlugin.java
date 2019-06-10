@@ -164,12 +164,14 @@ public class LoginScreenPlugin extends Plugin implements KeyListener
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		if (!config.pasteEnabled() || (
+		/*if (!config.pasteEnabled() || (
 			client.getGameState() != GameState.LOGIN_SCREEN &&
-			client.getGameState() != GameState.LOGIN_SCREEN_AUTHENTICATOR))
-		{
-			return;
-		}
+			client.getGameState() != GameState.LOGIN_SCREEN_AUTHENTICATOR))*/
+		if (!config.pasteEnabled() || (
+			client.getGameState() != GameState.LOGIN_SCREEN))
+		    {
+		        return;
+		    }
 
 		// enable pasting on macOS with the Command (meta) key
 		boolean isModifierDown = OSType.getOSType() == OSType.MacOS ? e.isMetaDown() : e.isControlDown();
