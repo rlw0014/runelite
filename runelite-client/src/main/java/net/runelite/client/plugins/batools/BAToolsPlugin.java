@@ -32,6 +32,8 @@ import net.runelite.api.Tile;
 import net.runelite.api.kit.KitType;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
@@ -49,7 +51,7 @@ import net.runelite.api.Client;
 import static net.runelite.api.Constants.CHUNK_SIZE;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.NPC;
+import net.runelite.api.MessageNode;
 import net.runelite.api.NpcID;
 import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
@@ -77,6 +79,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 
 @Slf4j
@@ -87,15 +90,21 @@ import net.runelite.client.util.Text;
 )
 public class BAToolsPlugin extends Plugin implements KeyListener
 {
+	private BufferedImage fighterImage, rangerImage, healerImage, runnerImage;
 	int inGameBit = 0;
 	int tickNum;
 	int pastCall = 0;
-	private int currentWave = 1;
 	private int lastHealer;
-	private static final int BA_WAVE_NUM_INDEX = 2;
+	private GameTimer gameTime;
+	private static final String START_WAVE = "1";
+	private String currentWave = START_WAVE;
 	private final List<MenuEntry> entries = new ArrayList<>();
 	private HashMap<Integer, Instant> foodPressed = new HashMap<>();
 	private CycleCounter counter;
+
+	private BAMonsterBox[] monsterDeathInfoBox = new BAMonsterBox[4];
+
+	private static final String ENDGAME_REWARD_NEEDLE_TEXT = "<br>5";
 
 	private boolean shiftDown;
 	private boolean ctrlDown;
@@ -141,6 +150,10 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		foodPressed.clear();
 		keyManager.registerKeyListener(this);
 		lastHealer = 0;
+		fighterImage = ImageUtil.getResourceStreamFromClass(getClass(), "fighter.png");
+		rangerImage = ImageUtil.getResourceStreamFromClass(getClass(), "ranger.png");
+		runnerImage = ImageUtil.getResourceStreamFromClass(getClass(), "runner.png");
+		healerImage = ImageUtil.getResourceStreamFromClass(getClass(), "healer.png");
 	}
 
 	@Override
@@ -148,9 +161,28 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	{
 		removeCounter();
 		inGameBit = 0;
+		gameTime = null;
+		currentWave = START_WAVE;
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
 		shiftDown = false;
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		switch (event.getGroupId())
+		{
+			case WidgetID.BA_REWARD_GROUP_ID:
+			{
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+
+				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
+				{
+					gameTime = null;
+				}
+			}
+		}
 	}
 
 	@Subscribe
@@ -506,6 +538,70 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			client.setInventoryDragDelay(config.antiDragDelay());
 		}
+		if(!config.deathTimeBoxes() || !config.defTimer())
+		{
+			removeCounter();
+		}
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if(event.getType() != ChatMessageType.GAMEMESSAGE)
+		{
+			return;
+		}
+
+		if (event.getMessage().startsWith("All of the Penance") && gameTime != null && inGameBit !=0)
+		{
+			String[] message = event.getMessage().split(" ");
+			final int waveSeconds = (int)gameTime.getTimeInSeconds(true);
+
+			if(config.deathTimeBoxes())
+			{
+				switch (message[4])
+				{
+					case "Healers":
+						monsterDeathInfoBox[0] = new BAMonsterBox(healerImage, this, waveSeconds, message[4], Color.green);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[0]);
+						break;
+					case "Runners":
+						monsterDeathInfoBox[1] = new BAMonsterBox(runnerImage, this, waveSeconds, message[4], Color.blue);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[1]);
+						break;
+					case "Fighters":
+						monsterDeathInfoBox[2] = new BAMonsterBox(fighterImage, this, waveSeconds, message[4], Color.red);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[2]);
+						break;
+					case "Rangers":
+						monsterDeathInfoBox[3] = new BAMonsterBox(rangerImage, this, waveSeconds, message[4], Color.red);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[3]);
+						break;
+				}
+			}
+			if(config.monsterDeathTimeChat())
+			{
+				final MessageNode node = event.getMessageNode();
+				final String nodeValue = Text.removeTags(node.getValue());
+				node.setValue(nodeValue + " (<col=ff0000>" + gameTime.getTimeInSeconds(true) + "s<col=ffffff>)");
+				chatMessageManager.update(node);
+			}
+		}
+
+		if (event.getMessage().startsWith("---- Wave:"))
+		{
+			String[] message = event.getMessage().split(" ");
+			currentWave = message[2];
+
+			if (currentWave.equals(START_WAVE))
+			{
+				gameTime = new GameTimer();
+			}
+			else if (gameTime != null)
+			{
+				gameTime.setWaveStartTime();
+			}
+		}
 	}
 
 	private void addCounter()
@@ -525,13 +621,19 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 	private void removeCounter()
 	{
-		if (counter == null)
+		if (counter != null)
 		{
-			return;
+			infoBoxManager.removeInfoBox(counter);
+			counter = null;
 		}
-
-		infoBoxManager.removeInfoBox(counter);
-		counter = null;
+		for (int i=0;i<monsterDeathInfoBox.length;i++)
+		{
+			if(monsterDeathInfoBox[i]!=null)
+			{
+				infoBoxManager.removeInfoBox(monsterDeathInfoBox[i]);
+				monsterDeathInfoBox[i] = null;
+			}
+		}
 	}
 
 	private void swap(String optionA, String optionB, String target, boolean strict)

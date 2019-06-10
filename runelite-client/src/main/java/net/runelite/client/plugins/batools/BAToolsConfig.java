@@ -156,8 +156,28 @@ public interface BAToolsConfig extends Config
 			keyName = "ctrlHealer",
 			name = "Control Healer",
 			description = "Hold ctrl to put last healer clicked on top"
-	)
+		)
 	default boolean ctrlHealer()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "monsterDeathTimeChat",
+			name = "Monster Death Time in Chat",
+			description = "Shows time in seconds when a specific monster dies"
+	)
+	default boolean monsterDeathTimeChat()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "deathTimeBoxes",
+			name = "Monster Death Boxes",
+			description = "Shows info boxes when a specific monster dies and time"
+	)
+	default boolean deathTimeBoxes()
 	{
 		return false;
 	}
