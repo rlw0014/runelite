@@ -377,9 +377,70 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			swap("quick-start", option, target, true);
 		}
-
 		//Ctrl Healer
-		if (client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT) == getWidget() && lastHealer != 0 && inGameBit == 1 && config.ctrlHealer() && ctrlDown)
+    if(config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
+		{
+			if(itemId == ItemID.LOGS && !target.contains("healing vial"))
+			{
+				if(client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null)
+					remove(new String[]{"take", "light"}, target, true);
+				else//remove "Light" option (and "Take" option if not defender).
+					remove("light", target, true);
+			}
+			else if(option.equals("attack") && client.getWidget(WidgetInfo.BA_ATK_ROLE_TEXT) == null && !target.equals("queen spawn"))//if not attacker
+			{//remove attack option from everything but queen spawns
+				remove(option, target, true);
+			}
+			else if((option.equals("fix")) && client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null)//if not defender
+			{
+				remove(option, target, true);
+			}
+			else if((option.equals("block") && target.equals("penance cave") && config.removePenanceCave()))
+			{//the check for option requires checking target as well because defensive attack style option is also called "block".
+				remove(option, target, true);
+			}
+			else if((option.equals("load")) && client.getWidget(WidgetInfo.BA_COLL_ROLE_TEXT) == null)//if not collector, remove hopper options
+			{
+				remove(new String[]{option, "look-in"}, target, true);
+			}
+			else if(config.removeWrongEggs() && option.equals("take"))
+			{
+				Widget eggToColl = client.getWidget(WidgetInfo.BA_COLL_LISTEN_TEXT);
+				if(eggToColl != null)//if we're a collector
+				{
+					List<Integer> eggsToHide = new ArrayList<>();
+					eggsToHide.add(ItemID.HAMMER);
+					switch(eggToColl.getText())//choose which eggs to hide take option for
+					{
+						case "Red eggs":
+							eggsToHide.add(ItemID.BLUE_EGG);
+							eggsToHide.add(ItemID.GREEN_EGG);
+							break;
+						case "Blue eggs":
+							eggsToHide.add(ItemID.RED_EGG);
+							eggsToHide.add(ItemID.GREEN_EGG);
+							break;
+						case "Green eggs":
+							eggsToHide.add(ItemID.RED_EGG);
+							eggsToHide.add(ItemID.BLUE_EGG);
+							break;
+					}
+					if(eggsToHide.contains(itemId))
+					{
+						remove(option, target, true);//hide wrong eggs
+					}
+				}
+				else
+				{
+					List<Integer> defenderItems = Arrays.asList(ItemID.HAMMER, ItemID.TOFU, ItemID.CRACKERS, ItemID.WORMS);//logs are handled separately due to hiding "light" option too.
+					if(client.getWidget(WidgetInfo.BA_DEF_ROLE_TEXT) == null || !defenderItems.contains(itemId))//if not defender, or item is not a defenderItem
+					{
+						remove(option, target, true);//hide everything except hammer/logs and bait if Defender
+					}
+				}
+			}
+		}
+		if(client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT) == getWidget() && lastHealer != 0 && inGameBit == 1 && config.ctrlHealer() && ctrlDown)
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			MenuEntry correctHealer = null;
@@ -527,7 +588,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 
-		if ((event.getTarget().contains("Penance Healer") || event.getTarget().contains("Penance Fighter") || event.getTarget().contains("Penance Ranger")))
+		if (config.healerGreenColor() && (event.getTarget().contains("Penance Healer")))
 		{
 
 			MenuEntry[] menuEntries = client.getMenuEntries();
