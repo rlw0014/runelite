@@ -73,6 +73,16 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
+		   keyName = "healerCodes",
+		   name = "Healer Codes",
+		   description = "Overlay to show healer codes"
+	)
+	default boolean healerCodes()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "antiDrag",
 		name = "Anti Drag",
 		description = "asd"
