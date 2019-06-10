@@ -24,18 +24,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package net.runelite.client.plugins.barbarianassault;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.api.*;
+import net.runelite.api.MessageNode;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.ItemID;
+import net.runelite.api.Player;
+import net.runelite.api.Tile;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.*;
+import net.runelite.api.events.ItemSpawned;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Varbits;
@@ -129,7 +135,7 @@ public class BarbarianAssaultPlugin extends Plugin
 	}
 
 	private Game game;
-    private Wave wave;
+	private Wave wave;
 
 	@Override
 	protected void startUp() throws Exception
@@ -141,7 +147,7 @@ public class BarbarianAssaultPlugin extends Plugin
 		greenEggs = new HashMap<>();
 		blueEggs = new HashMap<>();
 		yellowEggs = new HashMap<>();
-    }
+	}
 
 	@Override
 	protected void shutDown() throws Exception
@@ -163,17 +169,35 @@ public class BarbarianAssaultPlugin extends Plugin
 		{
 			case WidgetID.BA_REWARD_GROUP_ID:
 			{
+				Widget pointsWidget = client.getWidget(WidgetID.BA_REWARD_GROUP_ID, 14); //RUNNERS_PASSED
 				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+
+				if (pointsWidget != null && rewardWidget != null && !rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) &&
+						!hasAnnounced && client.getVar(Varbits.IN_GAME_BA) == 0)
+				{
+					wave = new Wave(client);
+					wave.setWaveAmounts();
+					wave.setWavePoints();
+					game.getWaves().add(wave);
+					if (config.showSummaryOfPoints())
+					{
+						announceSomething(wave.getWaveSummary());
+					}
+				}
 
 				if (config.waveTimes() && rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
 				{
 					announceTime("Game finished, duration: ", gameTime.getTime(false));
 					gameTime = null;
+					if (config.showTotalRewards())
+					{
+						announceSomething(game.getGameSummary());
+					}
 				}
 
-				break;
 			}
-			case WidgetID.BA_ATTACKER_GROUP_ID:
+			break;
+      case WidgetID.BA_ATTACKER_GROUP_ID:
 			{
 				setOverlayRound(Role.ATTACKER);
 				break;
@@ -197,7 +221,8 @@ public class BarbarianAssaultPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage) {
+	public void onChatMessage(ChatMessage chatMessage)
+	{
 		if (chatMessage.getMessage().toLowerCase().startsWith("wave points"))
 		{
 			hasAnnounced = true;
