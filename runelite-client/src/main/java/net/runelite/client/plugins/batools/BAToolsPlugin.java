@@ -25,8 +25,12 @@
  */
 package net.runelite.client.plugins.batools;
 
+import net.runelite.api.Player;
 import net.runelite.api.Prayer;
 import net.runelite.api.SoundEffectID;
+import net.runelite.api.Tile;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.Color;
@@ -36,7 +40,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,7 +72,6 @@ import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.events.WidgetHiddenChanged;
-import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
@@ -78,7 +80,6 @@ import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyListener;
 import net.runelite.client.input.KeyManager;
@@ -127,16 +128,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	private String currentWave = "1";
 	private int lastHealer;
 	private static final int BA_WAVE_NUM_INDEX = 2;
-	private GameTimer gameTime;
-	private static final String START_WAVE = "1";
-	private String currentWave = START_WAVE;
 	private final List<MenuEntry> entries = new ArrayList<>();
 	private HashMap<Integer, Instant> foodPressed = new HashMap<>();
 	private CycleCounter counter;
 
 	private BAMonsterBox[] monsterDeathInfoBox = new BAMonsterBox[4];
-
-	private static final String ENDGAME_REWARD_NEEDLE_TEXT = "<br>5";
 
 	private Actor lastInteracted;
 	private boolean shiftDown;
@@ -205,6 +201,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
 		lastHealer = 0;
+		hasAnnounced = false;
 		fighterImage = ImageUtil.getResourceStreamFromClass(getClass(), "fighter.png");
 		rangerImage = ImageUtil.getResourceStreamFromClass(getClass(), "ranger.png");
 		runnerImage = ImageUtil.getResourceStreamFromClass(getClass(), "runner.png");
@@ -235,22 +232,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		HpHealed = 0;
 	}
 
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
-	{
-		switch (event.getGroupId())
-		{
-			case WidgetID.BA_REWARD_GROUP_ID:
-			{
-				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-
-				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
-				{
-					gameTime = null;
-				}
-			}
-		}
-	}
 
 	@Subscribe
 	public void onWidgetHiddenChanged(WidgetHiddenChanged event)
@@ -530,13 +511,60 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
-		if (event.getType() == ChatMessageType.GAMEMESSAGE
-			&& event.getMessage().startsWith("---- Wave:"))
+		if (event.getType() != ChatMessageType.GAMEMESSAGE)
+		{
+			return;
+		}
+
+		if (event.getMessage().startsWith("All of the Penance") && gameTime != null && inGameBit != 0)
 		{
 			String[] message = event.getMessage().split(" ");
-			currentWave = Integer.parseInt(message[BA_WAVE_NUM_INDEX]);
-			wave_start = Instant.now();
-			healers.clear();
+			final int waveSeconds = (int)gameTime.getTimeInSeconds(true);
+
+			if (config.deathTimeBoxes())
+			{
+				switch (message[4])
+				{
+					case "Healers":
+						monsterDeathInfoBox[0] = new BAMonsterBox(healerImage, this, waveSeconds, message[4], Color.green);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[0]);
+						break;
+					case "Runners":
+						monsterDeathInfoBox[1] = new BAMonsterBox(runnerImage, this, waveSeconds, message[4], Color.blue);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[1]);
+						break;
+					case "Fighters":
+						monsterDeathInfoBox[2] = new BAMonsterBox(fighterImage, this, waveSeconds, message[4], Color.red);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[2]);
+						break;
+					case "Rangers":
+						monsterDeathInfoBox[3] = new BAMonsterBox(rangerImage, this, waveSeconds, message[4], Color.red);
+						infoBoxManager.addInfoBox(monsterDeathInfoBox[3]);
+						break;
+				}
+			}
+			if (config.monsterDeathTimeChat())
+			{
+				final MessageNode node = event.getMessageNode();
+				final String nodeValue = Text.removeTags(node.getValue());
+				node.setValue(nodeValue + " (<col=ff0000>" + gameTime.getTimeInSeconds(true) + "s<col=ffffff>)");
+				chatMessageManager.update(node);
+			}
+		}
+
+		if (event.getMessage().startsWith("---- Wave:"))
+		{
+			String[] message = event.getMessage().split(" ");
+			currentWave = message[2];
+
+			if (currentWave.equals(START_WAVE))
+			{
+				gameTime = new GameTimer();
+			}
+			else if (gameTime != null)
+			{
+				gameTime.setWaveStartTime();
+			}
 		}
 	}
 
@@ -616,11 +644,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		String option = Text.removeTags(event.getOption()).toLowerCase();
 		String target = Text.removeTags(event.getTarget()).toLowerCase();
 
-		//Incorrect call remover
-		if (config.calls() && getWidget() != null && event.getTarget().endsWith("horn") && inGameBit == 1)
-		final int itemId = event.getIdentifier();
-		String option = Text.removeTags(event.getOption()).toLowerCase();
-		String target = Text.removeTags(event.getTarget()).toLowerCase();
 		if (config.highlightCollectorEggs() && overlay.getCurrentRound() != null && overlay.getCurrentRound().getRoundRole() == Role.COLLECTOR)
 		{
 			String calledEgg = getCollectorHeardCall();
@@ -676,9 +699,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			entries.clear();
 			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
-		final int itemId = event.getIdentifier();
-		String option = Text.removeTags(event.getOption()).toLowerCase();
-		String target = Text.removeTags(event.getTarget()).toLowerCase();
 
 		if (config.swapLadder() && option.equals("climb-down") && target.equals("ladder"))
 		{
@@ -1019,66 +1039,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 	}
 
-	@Subscribe
-	public void onChatMessage(ChatMessage event)
-	{
-		if (event.getType() != ChatMessageType.GAMEMESSAGE)
-		{
-			return;
-		}
-
-		if (event.getMessage().startsWith("All of the Penance") && gameTime != null && inGameBit != 0)
-		{
-			String[] message = event.getMessage().split(" ");
-			final int waveSeconds = (int)gameTime.getTimeInSeconds(true);
-
-			if (config.deathTimeBoxes())
-			{
-				switch (message[4])
-				{
-					case "Healers":
-						monsterDeathInfoBox[0] = new BAMonsterBox(healerImage, this, waveSeconds, message[4], Color.green);
-						infoBoxManager.addInfoBox(monsterDeathInfoBox[0]);
-						break;
-					case "Runners":
-						monsterDeathInfoBox[1] = new BAMonsterBox(runnerImage, this, waveSeconds, message[4], Color.blue);
-						infoBoxManager.addInfoBox(monsterDeathInfoBox[1]);
-						break;
-					case "Fighters":
-						monsterDeathInfoBox[2] = new BAMonsterBox(fighterImage, this, waveSeconds, message[4], Color.red);
-						infoBoxManager.addInfoBox(monsterDeathInfoBox[2]);
-						break;
-					case "Rangers":
-						monsterDeathInfoBox[3] = new BAMonsterBox(rangerImage, this, waveSeconds, message[4], Color.red);
-						infoBoxManager.addInfoBox(monsterDeathInfoBox[3]);
-						break;
-				}
-			}
-			if (config.monsterDeathTimeChat())
-			{
-				final MessageNode node = event.getMessageNode();
-				final String nodeValue = Text.removeTags(node.getValue());
-				node.setValue(nodeValue + " (<col=ff0000>" + gameTime.getTimeInSeconds(true) + "s<col=ffffff>)");
-				chatMessageManager.update(node);
-			}
-		}
-
-		if (event.getMessage().startsWith("---- Wave:"))
-		{
-			String[] message = event.getMessage().split(" ");
-			currentWave = message[2];
-
-			if (currentWave.equals(START_WAVE))
-			{
-				gameTime = new GameTimer();
-			}
-			else if (gameTime != null)
-			{
-				gameTime.setWaveStartTime();
-			}
-		}
-	}
-
 	private void addCounter()
 	{
 		if (!config.defTimer() || counter != null)
@@ -1280,4 +1240,185 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		return false;
 	}
+
+	private void announceSomething(final ChatMessageBuilder chatMessage)
+	{
+		chatMessageManager.queue(QueuedMessage.builder()
+			   .type(ChatMessageType.CONSOLE)
+			   .runeLiteFormattedMessage(chatMessage.build())
+			   .build());
+	}
+
+
+	String getCollectorHeardCall()
+	{
+		Widget widget = client.getWidget(WidgetInfo.BA_COLL_LISTEN_TEXT);
+		String call = null;
+
+		if (widget != null)
+		{
+			call = widget.getText();
+		}
+
+		return call;
+	}
+
+	Map<WorldPoint, Integer> getCalledEggMap()
+	{
+		Map<WorldPoint, Integer> map;
+		String calledEgg = getCollectorHeardCall();
+
+		if (calledEgg == null)
+		{
+			return null;
+		}
+
+		switch (calledEgg)
+		{
+			case "Red eggs":
+				map = redEggs;
+				break;
+			case "Green eggs":
+				map = greenEggs;
+				break;
+			case "Blue eggs":
+				map = blueEggs;
+				break;
+			default:
+				map = null;
+		}
+
+		return map;
+	}
+
+	static Color getEggColor(String str)
+	{
+		Color color;
+
+		if (str == null)
+		{
+			return null;
+		}
+
+		if (str.startsWith("Red"))
+		{
+			color = Color.RED;
+		}
+		else if (str.startsWith("Green"))
+		{
+			color = Color.GREEN;
+		}
+		else if (str.startsWith("Blue"))
+		{
+			color = Color.CYAN;
+		}
+		else if (str.startsWith("Yellow"))
+		{
+			color = Color.YELLOW;
+		}
+		else
+		{
+			color = null;
+		}
+
+		return color;
+	}
+
+	private HashMap<WorldPoint, Integer> getEggMap(int itemID)
+	{
+		switch (itemID)
+		{
+			case ItemID.RED_EGG:
+				return redEggs;
+			case ItemID.GREEN_EGG:
+				return greenEggs;
+			case ItemID.BLUE_EGG:
+				return blueEggs;
+			case ItemID.YELLOW_EGG:
+				return yellowEggs;
+			default:
+				return null;
+		}
+	}
+
+
+	private void setOverlayRound(Role role)
+	{
+		// Prevent changing roles when a role is already set, as widgets can be
+		// loaded multiple times in game from eg. opening and closing the horn
+		// of glory.
+		if (overlay.getCurrentRound() != null)
+		{
+			return;
+		}
+
+		overlay.setCurrentRound(new Round(role));
+	}
+
+	private void announceTime(String preText, String time)
+	{
+		final String chatMessage = new ChatMessageBuilder()
+			   .append(ChatColorType.NORMAL)
+			   .append(preText)
+			   .append(ChatColorType.HIGHLIGHT)
+			   .append(time)
+			   .build();
+
+		chatMessageManager.queue(QueuedMessage.builder()
+			   .type(ChatMessageType.CONSOLE)
+			   .runeLiteFormattedMessage(chatMessage)
+			   .build());
+	}
+
+	private boolean isEgg(int itemID)
+	{
+		if (itemID == ItemID.RED_EGG || itemID == ItemID.GREEN_EGG
+			   || itemID == ItemID.BLUE_EGG || itemID == ItemID.YELLOW_EGG)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isUnderPlayer(Tile tile)
+	{
+		Player local = client.getLocalPlayer();
+		if (local == null)
+		{
+			return false;
+		}
+
+		return (tile.getWorldLocation().equals(local.getWorldLocation()));
+	}
+	public Image getClockImage()
+	{
+		return clockImage;
+	}
+
+	public int getListenItemId(WidgetInfo listenInfo)
+	{
+		Widget listenWidget = client.getWidget(listenInfo);
+
+		if (listenWidget != null)
+		{
+			switch (listenWidget.getText())
+			{
+				case "Tofu":
+					return ItemID.TOFU;
+				case "Crackers":
+					return ItemID.CRACKERS;
+				case "Worms":
+					return ItemID.WORMS;
+				case "Pois. Worms":
+					return ItemID.POISONED_WORMS;
+				case "Pois. Tofu":
+					return ItemID.POISONED_TOFU;
+				case "Pois. Meat":
+					return ItemID.POISONED_MEAT;
+			}
+		}
+
+		return -1;
+	}
+
 }
