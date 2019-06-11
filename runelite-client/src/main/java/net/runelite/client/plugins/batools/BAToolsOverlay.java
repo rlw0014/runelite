@@ -131,9 +131,9 @@ public class BAToolsOverlay extends Overlay
 		   {
 			  roleText.setText(String.format("00:%02d", currentRound.getTimeToChange()));
 		   }
-		   Rectangle spriteBounds = roleSprite.getBounds();
-		   roleSprite.setHidden(true);
-		   graphics.drawImage(plugin.getClockImage(), spriteBounds.x, spriteBounds.y, null);
+		   //Rectangle spriteBounds = roleSprite.getBounds();
+		   //roleSprite.setHidden(true);
+		   //graphics.drawImage(plugin.getClockImage(), spriteBounds.x, spriteBounds.y, null);
 	    }
 
 	    if (role == Role.COLLECTOR && config.highlightCollectorEggs())

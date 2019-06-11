@@ -35,7 +35,7 @@ class Round
 {
 	private final Instant roundStartTime;
 	@Getter
-	private final net.runelite.client.plugins.batools.Role roundRole;
+	private final Role roundRole;
 	@Getter
 	@Setter
 	private boolean runnersKilled;
@@ -50,7 +50,7 @@ class Round
 	private boolean fightersKilled;
 
 	@Inject
-	public Round(net.runelite.client.plugins.batools.Role role)
+	public Round(Role role)
 	{
 		this.roundRole = role;
 		this.roundStartTime = Instant.now().plusMillis(2 * Constants.GAME_TICK_LENGTH);

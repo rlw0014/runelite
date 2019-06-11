@@ -560,6 +560,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			if (currentWave.equals(START_WAVE))
 			{
 				gameTime = new GameTimer();
+				game = new Game(client);
 			}
 			else if (gameTime != null)
 			{
@@ -1372,12 +1373,8 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 	private boolean isEgg(int itemID)
 	{
-		if (itemID == ItemID.RED_EGG || itemID == ItemID.GREEN_EGG
-			   || itemID == ItemID.BLUE_EGG || itemID == ItemID.YELLOW_EGG)
-		{
-			return true;
-		}
-		return false;
+		return (itemID == ItemID.RED_EGG || itemID == ItemID.GREEN_EGG
+			   || itemID == ItemID.BLUE_EGG || itemID == ItemID.YELLOW_EGG);
 	}
 
 	private boolean isUnderPlayer(Tile tile)
