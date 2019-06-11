@@ -24,11 +24,12 @@
  */
 package net.runelite.client.plugins.batools;
 
+import net.runelite.api.Constants;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import net.runelite.api.Constants;
 
 class GameTimer
 {
@@ -50,6 +51,23 @@ class GameTimer
 		}
 
 		return formatTime(LocalTime.ofSecondOfDay(elapsed.getSeconds()));
+	}
+
+	long getTimeInSeconds(boolean waveTime)
+	{
+		final Instant now = Instant.now();
+		final Duration elapsed;
+
+		if (waveTime)
+		{
+			elapsed = Duration.between(prevWave, now);
+		}
+		else
+		{
+			elapsed = Duration.between(startTime, now).minusMillis(Constants.GAME_TICK_LENGTH);
+		}
+
+		return elapsed.getSeconds();
 	}
 
 	void setWaveStartTime()

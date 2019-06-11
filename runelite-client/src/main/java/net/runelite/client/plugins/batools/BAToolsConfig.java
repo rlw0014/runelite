@@ -86,21 +86,21 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "healerCodes",
-			name = "Healer Codes",
-			description = "Overlay to show healer codes"
-	)
-	default boolean healerCodes()
-	{
-		return false;
-	}
-
-	@ConfigItem(
 		keyName = "healerMenuOption",
 		name = "Healer menu options",
 		description = "Shows time since last food placed on healer"
 	)
 	default boolean healerMenuOption()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		   keyName = "healerCodes",
+		   name = "Healer Codes",
+		   description = "Overlay to show healer codes"
+	)
+	default boolean healerCodes()
 	{
 		return false;
 	}
@@ -180,28 +180,40 @@ public interface BAToolsConfig extends Config
 		name = "*Barbarian Assault Helper*",
 		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
-	default boolean removeBA() { return true; }
+	default boolean removeBA()
+	{
+		return true;
+	}
 
 	@ConfigItem(
 		keyName = "removeWrongEggs",
 		name = "Remove wrong eggs - *Barbarian Assault Helper*",
 		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
-	default boolean removeWrongEggs() { return false; }
+	default boolean removeWrongEggs()
+	{
+		return false;
+	}
 
 	@ConfigItem(
 		keyName = "removeWrongHealFood",
 		name = "Remove wrong Heal Food - *Barbarian Assault Helper*",
 		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
 	)
-	default boolean removeHealWrongFood() { return false; }
+	default boolean removeHealWrongFood()
+	{
+		return false;
+	}
 
 	@ConfigItem(
 		keyName = "removePenanceCave",
 		name = "Remove 'Block' Penance Cave",
 		description = "Removes unnecessary menu option, however Moon wanted it back"
 	)
-	default boolean removePenanceCave() { return false; }
+	default boolean removePenanceCave()
+	{
+		return false;
+	}
 
 	@ConfigItem(
 		keyName = "tagging",
@@ -224,14 +236,33 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "monsterDeathTimeChat",
+			name = "Monster Death Time in Chat",
+			description = "Shows time in seconds when a specific monster dies"
+	)
+	default boolean monsterDeathTimeChat()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "deathTimeBoxes",
+			name = "Monster Death Boxes",
+			description = "Shows info boxes when a specific monster dies and time"
+	)
+	default boolean deathTimeBoxes()
+	{
+		return false;
+	}
+	@ConfigItem(
 		keyName = "healerGreenColor",
 		name = "Healer green menu option",
 		description = "Toggle healer's menu option as green"
 	)
-    default boolean healerGreenColor()
-    {
-	   return false;
-    }
+    	default boolean healerGreenColor()
+    	{
+	   	return false;
+    	}
 
     @ConfigItem(
 		  keyName = "shiftWalkHere",
