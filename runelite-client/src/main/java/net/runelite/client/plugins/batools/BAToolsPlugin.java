@@ -801,20 +801,19 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
+		final int itemId = event.getIdentifier();
+		String option = Text.removeTags(event.getOption()).toLowerCase();
+		String target = Text.removeTags(event.getTarget()).toLowerCase();
 		if (config.highlightCollectorEggs() && overlay.getCurrentRound() != null && overlay.getCurrentRound().getRoundRole() == Role.COLLECTOR)
 		{
 			String calledEgg = getCollectorHeardCall();
-			String target = event.getTarget();
-			String option = event.getOption();
-			String targetClean = target.substring(target.indexOf('>') + 1);
-			String optionClean = option.substring(option.indexOf('>') + 1);
 
-			if ("Take".equals(optionClean)) {
+			if ("Take".equals(option)) {
 				Color highlightColor = null;
 
-				if (calledEgg != null && calledEgg.startsWith(targetClean)) {
-					highlightColor = getEggColor(targetClean);
-				} else if ("Yellow egg".equals(targetClean)) {
+				if (calledEgg != null && calledEgg.startsWith(target)) {
+					highlightColor = getEggColor(target);
+				} else if ("Yellow egg".equals(target)) {
 					// Always show yellow egg
 					highlightColor = Color.YELLOW;
 				}
@@ -822,23 +821,24 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				if (highlightColor != null) {
 					MenuEntry[] menuEntries = client.getMenuEntries();
 					MenuEntry last = menuEntries[menuEntries.length - 1];
-					last.setTarget(ColorUtil.prependColorTag(targetClean, highlightColor));
+					last.setTarget(ColorUtil.prependColorTag(target, highlightColor));
 					client.setMenuEntries(menuEntries);
 				}
 			}
 		}
-		if (config.calls() && getWidget() != null && event.getTarget().endsWith("horn") && !event.getTarget().contains("Unicorn"))
+
+		//Incorrect call remover
+		if (config.calls() && getWidget() != null && event.getTarget().endsWith("horn") && inGameBit == 1)
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			Widget callWidget = getWidget();
-			String call = Calls.getOption(callWidget.getText());
+			String call = callWidget.getText();
 			MenuEntry correctCall = null;
 
 			entries.clear();
 			for (MenuEntry entry : menuEntries)
 			{
-				String option = entry.getOption();
-				if (option.equals(call))
+				if (entry.getOption().contains("Tell-") && call.toLowerCase().contains(entry.getOption().substring(5)))
 				{
 					correctCall = entry;
 				}
@@ -854,14 +854,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
 		}
-		final int itemId = event.getIdentifier();
-		String option = Text.removeTags(event.getOption()).toLowerCase();
-		String target = Text.removeTags(event.getTarget()).toLowerCase();
-		if (config.swapDestroyEggs() && (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
+		if (config.swapDestroyEggs() && (target.equals("Red egg") || target.equals("Green egg") || target.equals("Blue egg")))
 		{
 			swap("destroy", option, target, false);
 		}
-		if (config.swapCollectorBag() && target.equals("collection bag"))
+		if (config.swapCollectorBag() && target.equals("Collection bag"))
 		{
 			swap("empty", option, target, false);
 		}
@@ -869,7 +866,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			   !option.equals("Stock-Up") && !option.equals("Take-Vial") &&
 			   !option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
 			   !option.equals("Take-Meat") &&
-			   !target.contains("Nuff"))
+			   !target.startsWith("Nuff"))
 		{
 		// Keep moving 'Walk here' to the end of the entries (left-click option)
 		MenuEntry[] entries = client.getMenuEntries();
@@ -885,7 +882,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			  client.setMenuEntries(entries);
 			}
 		}
-
 
 		if (config.swapLadder() && option.equals("climb-down") && target.equals("ladder"))
 		{
@@ -1088,7 +1084,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 
-		if (config.healerGreenColor() && (event.getTarget().contains("Penance Healer")))
+		if (config.healerGreenColor() && (target.contains("Penance Healer")))
 		{
 
 			MenuEntry[] menuEntries = client.getMenuEntries();
@@ -1112,7 +1108,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			client.setMenuEntries(menuEntries);
 		}
 
-		if (client.getWidget(WidgetInfo.BA_COLL_LISTEN_TEXT) != null && inGameBit == 1 && config.eggBoi() && event.getTarget().endsWith("egg") && shiftDown)
+		if (client.getWidget(WidgetInfo.BA_COLL_LISTEN_TEXT) != null && inGameBit == 1 && config.eggBoi() && target.endsWith("egg") && shiftDown)
 		{
 			String[] currentCall = client.getWidget(WidgetInfo.BA_COLL_LISTEN_TEXT).getText().split(" ");
 			log.info("1 " + currentCall[0]);
@@ -1122,11 +1118,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 			for (MenuEntry entry : menuEntries)
 			{
-				if (entry.getTarget().contains(currentCall[0]) && entry.getOption().equals("Take"))
+				if (target.contains(currentCall[0]) && option.equals("Take"))
 				{
 					correctEgg = entry;
 				}
-				else if (!entry.getOption().startsWith("Take"))
+				else if (!option.startsWith("Take"))
 				{
 					entries.add(entry);
 				}
@@ -1134,21 +1130,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			if (correctEgg != null)
 			{
 				entries.add(correctEgg);
-			}
-			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
-		}
-		if (client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null && inGameBit == 1 && config.attackStyles() && shiftDown)
-		{
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			MenuEntry correctEgg = null;
-			entries.clear();
-
-			for (MenuEntry entry : menuEntries)
-			{
-				if (entry.getOption().contains("Walk here"))
-				{
-					entries.add(entry);
-				}
 			}
 			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
