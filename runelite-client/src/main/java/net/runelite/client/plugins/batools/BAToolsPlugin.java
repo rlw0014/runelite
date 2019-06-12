@@ -31,6 +31,8 @@ import net.runelite.api.SoundEffectID;
 import net.runelite.api.Tile;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemSpawned;
+import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
+import static net.runelite.api.MenuAction.WALK;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.Color;
@@ -495,6 +497,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			if (inGameBit == 1)
 			{
 				pastCall = 0;
+				overlay.setCurrentRound(null);
 				removeCounter();
 				foodPressed.clear();
 			}
@@ -554,9 +557,12 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		if (event.getMessage().startsWith("---- Wave:"))
 		{
-			String[] message = event.getMessage().split(" ");
-			currentWave = message[2];
-
+			String[] tempMessage = event.getMessage().split(" ");
+			currentWave = tempMessage[BA_WAVE_NUM_INDEX];
+			collectedEggCount = 0;
+			HpHealed = 0;
+			positiveEggCount = 0;
+			wrongEggs = 0;
 			if (currentWave.equals(START_WAVE))
 			{
 				gameTime = new GameTimer();
@@ -566,6 +572,34 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			{
 				gameTime.setWaveStartTime();
 			}
+		}
+		String message = event.getMessage();
+		final MessageNode messageNode = event.getMessageNode();
+		final String nodeValue = Text.removeTags(messageNode.getValue());
+		String recolored = null;
+		if (message.contains("exploded"))
+		{
+			wrongEggs++;
+			positiveEggCount--;
+		}
+		if (message.contains("You healed"))
+		{
+			String[] tokens = event.getMessage().split(" ");
+			if (Integer.parseInt(tokens[2]) > 0)
+			{
+				int Hp = Integer.parseInt(tokens[2]);
+				HpHealed += Hp;
+			}
+		}
+
+		if (message.contains("the wrong type of poisoned food to use"))
+		{
+			recolored = ColorUtil.wrapWithColorTag(nodeValue, config.wrongPoisonFoodTextColor());
+		}
+		if (recolored != null)
+		{
+			messageNode.setValue(recolored);
+			chatMessageManager.update(messageNode);
 		}
 	}
 
@@ -695,12 +729,14 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 			}
 		}
-		else if (config.calls() && event.getTarget().endsWith("horn"))
+		if (config.swapDestroyEggs() && (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
 		{
-			entries.clear();
-			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+			swap("destroy", option, target, false);
 		}
-
+		if (config.swapCollectorBag() && target.equals("collection bag"))
+		{
+			swap("empty", option, target, false);
+		}
 		if (config.swapLadder() && option.equals("climb-down") && target.equals("ladder"))
 		{
 			swap("quick-start", option, target, true);
@@ -835,7 +871,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 									calledPoison = ItemID.POISONED_WORMS;
 									break;
 							}
-							System.out.println(target.equals(item));
+							//System.out.println(target.equals(item));
 							if (target.equals(item))//if targeting the item itself
 							{
 								if (calledPoison != 0 && itemId != calledPoison)//if no call or chosen item is not the called one
@@ -965,21 +1001,17 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
 
-		//Attacker shift to walk here
-		if (client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null && inGameBit == 1 && config.attackStyles() && shiftDown)
+		if (config.shiftWalkHere() && shiftDown)
 		{
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			MenuEntry correctEgg = null;
-			entries.clear();
-
-			for (MenuEntry entry : menuEntries)
+			if (event.getType() < WALK.getId())
 			{
-				if (entry.getOption().contains("Walk here"))
-				{
-					entries.add(entry);
-				}
+				MenuEntry[] menuEntries = client.getMenuEntries();
+				MenuEntry menuEntry = menuEntries[menuEntries.length - 1];
+				menuEntry.setType(event.getType() + MENU_ACTION_DEPRIORITIZE_OFFSET);
+
+				client.setMenuEntries(menuEntries);
 			}
-			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+			return;
 		}
 
 		if (client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT) != null && inGameBit == 1 && config.osHelp() && event.getTarget().equals("<col=ffff>Healer item machine") && shiftDown)
