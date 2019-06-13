@@ -152,7 +152,7 @@ public class BAToolsOverlay extends Overlay
 	    }
 	    Widget inventory = client.getWidget(WidgetInfo.INVENTORY);
 
-	    if (config.highlightItems() && inventory != null && !inventory.isHidden() && ((role == Role.DEFENDER || role == Role.HEALER)))
+	    if (config.highlightItems() && inventory != null && !inventory.isHidden() && role != Role.COLLECTOR)
 	    {
 		   int listenItemId = plugin.getListenItemId(role.getListen());
 

@@ -403,6 +403,12 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				addCounter();
 			}
 			counter.setCount(tickNum++);
+			if (config.testing())
+			{
+				Role role = overlay.getCurrentRound().getRoundRole();
+				Widget w = client.getWidget(role.getListen());
+				log.info(w.getText());
+			}
 		}
 
 		if (config.prayerMetronome() && isAnyPrayerActive())
@@ -1444,6 +1450,14 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 					return ItemID.POISONED_TOFU;
 				case "Pois. Meat":
 					return ItemID.POISONED_MEAT;
+				case "Bullet/Wind":
+					return ItemID.BULLET_ARROW;
+				case "Field/Water":
+					return ItemID.FIELD_ARROW;
+				case "Blunt/Earth":
+					return ItemID.BLUNT_ARROW;
+				case "Barbed/Fire":
+					return ItemID.BARBED_ARROW;
 			}
 		}
 

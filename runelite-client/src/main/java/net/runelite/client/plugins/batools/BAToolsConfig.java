@@ -264,95 +264,105 @@ public interface BAToolsConfig extends Config
 	   	return false;
     	}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "shiftWalkHere",
 		  name = "Shift-Click Walk here",
 		  description = "Make Walk here the left-click option when holding shift"
-    )
-    default boolean shiftWalkHere()
-    {
+	)
+	default boolean shiftWalkHere()
+	{
 	   return false;
-    }
+	}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "swapCollectorBag",
 		  name = "Swap left click collector bag to Empty",
 		  description = "Make empty the left-click option on collector bag 'Empty'"
-    )
-    default boolean swapCollectorBag()
-    {
+	)
+	default boolean swapCollectorBag()
+	{
 	   return false;
-    }
+	}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "swapDestroyEggs",
 		  name = "Swap left click destroy eggs in BA",
 		  description = "Make destroy the left-click option for collector eggs"
-    )
-    default boolean swapDestroyEggs()
-    {
+	)
+	default boolean swapDestroyEggs()
+	{
 	   return false;
-    }
+	}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "showEggCountOverlay",
 		  name = "Overlay of eggs counted",
 		  description = "Display current egg count as collector"
-    )
-    default boolean showEggCountOverlay() { return false; }
+	)
+	default boolean showEggCountOverlay() { return false; }
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "showHpCountOverlay",
 		  name = "Overlay of Hp counted",
 		  description = "Display current healed count as healer"
-    )
-    default boolean showHpCountOverlay() { return false; }
+	)
+	default boolean showHpCountOverlay() { return false; }
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "highlightCollectorEggs",
 		  name = "Highlight collector eggs",
 		  description = "Highlight called egg colors"
-    )
-    default boolean highlightCollectorEggs() { return false; }
+	)
+	default boolean highlightCollectorEggs() { return false; }
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "showTotalRewards",
 		  name = "Summarize total reward points",
 		  description = "Displays total eggs/healed hp and missed attacks/lost runners"
-    )
-    default boolean showTotalRewards(){ return false; }
+	)
+	default boolean showTotalRewards(){ return false; }
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "showSummaryOfPoints",
 		  name = "Display summary of advanced points",
 		  description = "Gives summary of advanced points breakdown in chat log"
-    )
-    default boolean showSummaryOfPoints() { return false; }
+	)
+	default boolean showSummaryOfPoints() { return false; }
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "wrongPoisonFoodTextColor",
 		  name = "Change healer wrong poison pack color",
 		  description = "Change healer wrong poison pack color"
-    )
-    default Color wrongPoisonFoodTextColor() { return Color.BLACK;}
+	)
+	default Color wrongPoisonFoodTextColor() { return Color.BLACK;}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "highlightItems",
 		  name = "Highlight called poison/bait",
 		  description = "Highlights the poison or bait that was called by your teammate"
-    )
-    default boolean highlightItems()
-    {
+	)
+	default boolean highlightItems()
+	{
 	   return false;
-    }
+	}
 
-    @ConfigItem(
+	@ConfigItem(
 		  keyName = "highlightColor",
 		  name = "Highlight color",
 		  description = "Configures the color to highlight the called poison/bait"
-    )
-    default Color highlightColor()
-    {
+	)
+	default Color highlightColor()
+	{
 	   return Color.GREEN;
-    }
+	}
+
+	@ConfigItem(
+		   keyName = "testing",
+		   name = "testing",
+		   description = "testing"
+	)
+	default boolean testing()
+	{
+		return false;
+	}
 }
