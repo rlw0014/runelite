@@ -1436,7 +1436,13 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 		if (listenWidget != null)
 		{
-			switch (listenWidget.getText())
+			String text = listenWidget.getText();
+			if (text.contains("/"))
+			{
+				String[] textSplit = text.split("/");
+				text = textSplit[0];
+			}
+			switch (text)
 			{
 				case "Tofu":
 					return ItemID.TOFU;
@@ -1450,13 +1456,13 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 					return ItemID.POISONED_TOFU;
 				case "Pois. Meat":
 					return ItemID.POISONED_MEAT;
-				case "Bullet/Wind":
+				case "Bullet":
 					return ItemID.BULLET_ARROW;
-				case "Field/Water":
+				case "Field":
 					return ItemID.FIELD_ARROW;
-				case "Blunt/Earth":
+				case "Blunt":
 					return ItemID.BLUNT_ARROW;
-				case "Barbed/Fire":
+				case "Barbed":
 					return ItemID.BARBED_ARROW;
 			}
 		}
