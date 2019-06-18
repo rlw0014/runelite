@@ -318,7 +318,7 @@ public class BASPlugin extends Plugin implements KeyListener
 		RequestBody requestBody = new MultipartBody.Builder()
 				.setType(MultipartBody.FORM)
 				.addFormDataPart("entry.1481518570", priority)
-				.addFormDataPart("entry.1794472797", name)
+				.addFormDataPart("entry.1794472797", Text.standardize(name))
 				.addFormDataPart("entry.1391010025", formItem)
 				.addFormDataPart("entry.1284888696", queueName)
 				.build();
@@ -349,7 +349,7 @@ public class BASPlugin extends Plugin implements KeyListener
 						.host("blairm.net")
 						.addPathSegment("bas")
 						.addPathSegment("update.php")
-						.addQueryParameter("a", name)
+						.addQueryParameter("a", Text.standardize(name))
 						.build();
 
 				Request request = new Request.Builder()
@@ -380,7 +380,6 @@ public class BASPlugin extends Plugin implements KeyListener
 					{
 						BufferedReader in = new BufferedReader(new StringReader(response.body().string()));
 						String s;
-						csvContent.clear();
 						String CustId = "";
 						while ((s = in.readLine()) != null)
 						{
