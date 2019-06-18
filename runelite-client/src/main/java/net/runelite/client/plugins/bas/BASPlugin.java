@@ -91,8 +91,11 @@ public class BASPlugin extends Plugin implements KeyListener
 	private static final String BUY_QK_PREM = "Prem Queen Kill";
 	private static final String BUY_HAT_REG = "Reg Hat";
 	private static final String BUY_HAT_PREM = "Prem Hat";
+	private static final String BUY_1R_REG = "Reg 1R Points";
+	private static final String BUY_1R_PREM = "Prem 1R Points";
 	private static final ImmutableList<String> BAS_OPTIONS = ImmutableList.of(MARK_DONE, MARK_INPROGRESS, MARK_NOTINPROGRESS);
-	private static final ImmutableList<String> BAS_BUY_OPTIONS = ImmutableList.of(BUY_TORSO_REG, BUY_TORSO_PREM, BUY_LVL5_REG, BUY_LVL5_PREM, BUY_QK_REG, BUY_QK_REG, BUY_QK_PREM,BUY_HAT_REG,BUY_HAT_PREM);
+	private static final ImmutableList<String> BAS_BUY_OPTIONS = ImmutableList.of(BUY_1R_PREM,BUY_1R_REG,BUY_HAT_PREM,BUY_HAT_REG,BUY_QK_PREM,BUY_QK_REG,BUY_LVL5_PREM
+	,BUY_LVL5_REG,BUY_TORSO_PREM,BUY_TORSO_REG);
 	private static int spreadsheetIgnoreLines = 4;
 	private List<String[]> csvContent = new ArrayList<>();
 	private List<String> ccMembersList = new ArrayList<>();
@@ -182,7 +185,7 @@ public class BASPlugin extends Plugin implements KeyListener
 			}
 
 
-			if(ccMembersList.contains(Text.removeTags(Text.sanitize(event.getTarget()))))
+			if(config.markCustomerOptions()&& ccMembersList.contains(Text.removeTags(Text.sanitize(event.getTarget()))))
 			{
 				for (String basOption : BAS_OPTIONS)
 				{
@@ -197,20 +200,28 @@ public class BASPlugin extends Plugin implements KeyListener
 					insertMenuEntry(menuOption, client.getMenuEntries());
 				}
 			}
-
-			if(shiftDown)
+			else if(shiftDown && config.addToQueue())
 			{
 				for (String basOption : BAS_BUY_OPTIONS)
 				{
-					final MenuEntry menuOption = new MenuEntry();
-					menuOption.setOption(basOption);
-					menuOption.setTarget(event.getTarget());
-					menuOption.setType(MenuAction.RUNELITE.getId());
-					menuOption.setParam0(event.getActionParam0());
-					menuOption.setParam1(event.getActionParam1());
-					menuOption.setIdentifier(event.getIdentifier());
+					if(
+							((basOption.equals(BUY_TORSO_REG)||basOption.equals(BUY_TORSO_PREM))&&config.torsoOptions()) ||
+							((basOption.equals(BUY_HAT_REG)||basOption.equals(BUY_HAT_PREM))&&config.hatOptions()) ||
+							((basOption.equals(BUY_QK_REG)||basOption.equals(BUY_QK_PREM))&&config.qkOptions()) ||
+							((basOption.equals(BUY_1R_REG)||basOption.equals(BUY_1R_PREM))&&config.OneROptions()) ||
+							((basOption.equals(BUY_LVL5_REG)||basOption.equals(BUY_LVL5_PREM))&&config.Lvl5Options())
+					)
+					{
+						final MenuEntry menuOption = new MenuEntry();
+						menuOption.setOption(basOption);
+						menuOption.setTarget(event.getTarget());
+						menuOption.setType(MenuAction.RUNELITE.getId());
+						menuOption.setParam0(event.getActionParam0());
+						menuOption.setParam1(event.getActionParam1());
+						menuOption.setIdentifier(event.getIdentifier());
 
-					insertMenuEntry(menuOption, client.getMenuEntries());
+						insertMenuEntry(menuOption, client.getMenuEntries());
+					}
 				}
 			}
 		}
@@ -287,6 +298,9 @@ public class BASPlugin extends Plugin implements KeyListener
 			case BUY_TORSO_REG:
 				formItem = "Torso";
 				break;
+			case BUY_1R_REG:
+				formItem = "One Round - Points";
+				break;
 			case BUY_HAT_PREM:
 				priority = "Premium";
 				formItem = "Hat";
@@ -303,6 +317,10 @@ public class BASPlugin extends Plugin implements KeyListener
 				priority = "Premium";
 				formItem = "Torso";
 				break;
+			case BUY_1R_PREM:
+				priority = "Premium";
+				formItem = "One Round - Points";
+				break;
 		}
 
 		HttpUrl httpUrl = new HttpUrl.Builder()
@@ -318,7 +336,7 @@ public class BASPlugin extends Plugin implements KeyListener
 		RequestBody requestBody = new MultipartBody.Builder()
 				.setType(MultipartBody.FORM)
 				.addFormDataPart("entry.1481518570", priority)
-				.addFormDataPart("entry.1794472797", Text.standardize(name))
+				.addFormDataPart("entry.1794472797", name.replace('\u00A0', ' '))
 				.addFormDataPart("entry.1391010025", formItem)
 				.addFormDataPart("entry.1284888696", queueName)
 				.build();
@@ -349,7 +367,7 @@ public class BASPlugin extends Plugin implements KeyListener
 						.host("blairm.net")
 						.addPathSegment("bas")
 						.addPathSegment("update.php")
-						.addQueryParameter("a", Text.standardize(name))
+						.addQueryParameter("a", name.replace('\u00A0', ' '))
 						.build();
 
 				Request request = new Request.Builder()
