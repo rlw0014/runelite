@@ -141,7 +141,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	protected void shutDown() throws Exception
 	{
 		keyManager.unregisterKeyListener(this);
-		readCSV();
+		ccUpdate();
 		ccPremList.clear();
 		csvContent.clear();
 	}
@@ -183,7 +183,6 @@ public class BASPlugin extends Plugin implements KeyListener
 			{
 				return;
 			}
-
 
 			if(config.markCustomerOptions()&& ccMembersList.contains(Text.removeTags(Text.sanitize(event.getTarget()))))
 			{
@@ -444,6 +443,11 @@ public class BASPlugin extends Plugin implements KeyListener
     
     private void checkUsers()
 	{
+		if(!client.getClanOwner().equals(ccName))
+		{
+			return;
+		}
+
 		for (ClanMember memberCM : client.getClanMembers())
 		{
 			String member = memberCM.getUsername();
