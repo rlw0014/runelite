@@ -287,8 +287,12 @@ public class BASPlugin extends Plugin
 				csvContent.clear();
 				while ((s = in.readLine()) != null)
 				{
+
 					String[] splitString = s.split(",");
-					csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
+					if(splitString.length>1)
+					{
+						csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
+					}
 				}
 			}
 		});
