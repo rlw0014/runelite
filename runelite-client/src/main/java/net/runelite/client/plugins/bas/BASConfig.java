@@ -35,7 +35,8 @@ public interface BASConfig extends Config
 	@ConfigItem(
 			keyName = "autoUpdateQueue",
 			name = "Queue Auto-updater",
-			description = "Automatically updates the BAS Queue"
+			description = "Automatically updates the BAS Queue",
+			position = 1
 	)
 	default boolean autoUpdateQueue()
 	{
@@ -46,10 +47,103 @@ public interface BASConfig extends Config
 			keyName = "premNotifier",
 			name = "Premium Notifier",
 			description = "Notify if a Premium customer comes online/offline"
+			,
+			position = 2
 	)
 	default boolean premNotifier()
 	{
 		return true;
 	}
+
+	@ConfigItem(
+			keyName = "markCustomerOptions",
+			name = "Mark Customer Options",
+			description = "Adds options to mark customers"
+			,
+			position = 3
+	)
+	default boolean markCustomerOptions()
+	{
+		return false;
+	}
+
+
+	@ConfigItem(
+			keyName = "addToQueue",
+			name = "Shift add to queue options",
+			description = "Hold shift to view more options that allow adding customers directly to the queue",
+			position = 4
+	)
+	default boolean addToQueue()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "torsoOptions",
+			name = "Torso Options",
+			description = "Show options to add Torso when \"Shift add to queue options\" is enabled",
+			position = 5
+	)
+	default boolean torsoOptions()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "hatOptions",
+			name = "Hat Options",
+			description = "Show options to add Hat when \"Shift add to queue options\" is enabled",
+			position = 6
+	)
+	default boolean hatOptions()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "qkOptions",
+			name = "Queen Kill Options",
+			description = "Show options to add Queen Kill when \"Shift add to queue options\" is enabled",
+			position = 7
+	)
+	default boolean qkOptions()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "OneROptions",
+			name = "One Round Options",
+			description = "Show options to add One Round - Points when \"Shift add to queue options\" is enabled",
+			position = 8
+	)
+	default boolean OneROptions()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "Lvl5Options",
+			name = "Level 5 Roles Options",
+			description = "Show options to add Level 5 Roles when \"Shift add to queue options\" is enabled",
+			position = 9
+	)
+	default boolean Lvl5Options()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "queueName",
+			name = "Queue sheet name",
+			description = "The name that you would like the queue to recognise you as. If not set it will use the currently logged in username.",
+			position = 10
+	)
+	default String queueName()
+	{
+		return "";
+	}
+
 
 }
