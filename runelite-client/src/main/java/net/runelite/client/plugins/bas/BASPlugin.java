@@ -603,6 +603,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				csvContent.clear();
 				while ((s = in.readLine()) != null)
 				{
+
 					String[] splitString = s.split(",");
 					if(splitString.length>1)
 					{
