@@ -52,4 +52,25 @@ public interface BASConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+			keyName = "markCustomerOptions",
+			name = "Mark Customer Options",
+			description = "Adds options to mark customers"
+	)
+	default boolean markCustomerOptions()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			keyName = "queueName",
+			name = "Queue sheet name",
+			description = "The name that you would like the queue to recognise you as. If not set it will use the currently logged in username."
+	)
+	default String queueName()
+	{
+		return "";
+	}
+
+
 }
