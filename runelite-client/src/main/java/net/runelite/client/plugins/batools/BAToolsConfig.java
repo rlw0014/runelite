@@ -240,5 +240,14 @@ public interface BAToolsConfig extends Config
     	{
 	   	return false;
     	}
+	@ConfigItem(
+		   keyName = "shiftWalkHere",
+		   name = "Shift Walk Here",
+		   description = "Press Shift then click to always walk here"
+	)
+	default boolean shiftWalkHere()
+	{
+		return false;
+	}
 
 }
