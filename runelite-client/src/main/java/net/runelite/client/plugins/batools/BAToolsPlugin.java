@@ -43,6 +43,8 @@ import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
+import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
+import static net.runelite.api.MenuAction.WALK;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MessageNode;
 import net.runelite.api.NPC;
@@ -640,21 +642,19 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		//Attacker shift to walk here
-		if (client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null && inGameBit == 1 && config.attackStyles() && shiftDown)
+		if (config.shiftWalkHere() && shiftDown)
 		{
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			MenuEntry correctEgg = null;
-			entries.clear();
-
-			for (MenuEntry entry : menuEntries)
+			if (event.getType() < WALK.getId())
 			{
-				if (entry.getOption().contains("Walk here"))
-				{
-					entries.add(entry);
-				}
+				MenuEntry[] menuEntries = client.getMenuEntries();
+				MenuEntry menuEntry = menuEntries[menuEntries.length - 1];
+				menuEntry.setType(event.getType() + MENU_ACTION_DEPRIORITIZE_OFFSET);
+
+				client.setMenuEntries(menuEntries);
 			}
-			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
+			return;
 		}
+
 
 		//Shift healer OS
 		if (client.getWidget(WidgetInfo.BA_HEAL_LISTEN_TEXT) != null && inGameBit == 1 && config.osHelp() && event.getTarget().equals("<col=ffff>Healer item machine") && shiftDown)
