@@ -25,6 +25,7 @@
  */
 package net.runelite.client.plugins.batools;
 
+import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -32,6 +33,16 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("BATools")
 public interface BAToolsConfig extends Config
 {
+	@ConfigItem(
+		keyName = "showTimer",
+		name = "Show call change timer",
+		description = "Show time to next call change",
+		hidden = true
+	)
+	default boolean showTimer()
+	{
+		return true;
+	}
 	@ConfigItem(
 		keyName = "defTimer",
 		name = "Defender Tick Timer",
@@ -73,9 +84,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-		   keyName = "healerCodes",
-		   name = "Healer Codes",
-		   description = "Overlay to show healer codes"
+		keyName = "healerCodes",
+		name = "Healer Codes",
+		description = "Overlay to show healer codes"
 	)
 	default boolean healerCodes()
 	{
@@ -213,9 +224,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "monsterDeathTimeChat",
-			name = "Monster Death Time in Chat",
-			description = "Shows time in seconds when a specific monster dies"
+		keyName = "monsterDeathTimeChat",
+		name = "Monster Death Time in Chat",
+		description = "Shows time in seconds when a specific monster dies"
 	)
 	default boolean monsterDeathTimeChat()
 	{
@@ -223,9 +234,9 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "deathTimeBoxes",
-			name = "Monster Death Boxes",
-			description = "Shows info boxes when a specific monster dies and time"
+		keyName = "deathTimeBoxes",
+		name = "Monster Death Boxes",
+		description = "Shows info boxes when a specific monster dies and time"
 	)
 	default boolean deathTimeBoxes()
 	{
@@ -241,13 +252,81 @@ public interface BAToolsConfig extends Config
 	   	return false;
     	}
 	@ConfigItem(
-		   keyName = "shiftWalkHere",
-		   name = "Shift Walk Here",
-		   description = "Press Shift then click to always walk here"
+		keyName = "shiftWalkHere",
+		name = "Shift Walk Here",
+		description = "Press Shift then click to always walk here"
 	)
 	default boolean shiftWalkHere()
 	{
 		return false;
 	}
+	@ConfigItem(
+		keyName = "showEggCountOverlay",
+		name = "Overlay of eggs counted",
+		description = "Display current egg count as collector",
+		position = 3
+	)
+	default boolean showEggCountOverlay() { return false; }
 
+	@ConfigItem(
+		keyName = "showHpCountOverlay",
+		name = "Overlay of Hp counted",
+		description = "Display current healed count as healer",
+		position = 5
+	)
+	default boolean showHpCountOverlay() { return false; }
+
+	@ConfigItem(
+		keyName = "highlightCollectorEggs",
+		name = "Highlight collector eggs",
+		description = "Highlight called egg colors",
+		position = 6
+	)
+	default boolean highlightCollectorEggs() { return false; }
+
+	@ConfigItem(
+		keyName = "showTotalRewards",
+		name = "Summarize total reward points",
+		description = "Displays total eggs/healed hp and missed attacks/lost runners",
+		position = 7
+	)
+	default boolean showTotalRewards(){ return false; }
+
+	@ConfigItem(
+		keyName = "showSummaryOfPoints",
+		name = "Display summary of advanced points",
+		description = "Gives summary of advanced points breakdown in chat log",
+		position = 8
+	)
+	default boolean showSummaryOfPoints() { return false; }
+
+	@ConfigItem(
+		keyName = "wrongPoisonFoodTextColor",
+		name = "Change healer wrong poison pack color",
+		description = "Change healer wrong poison pack color",
+		position = 9
+	)
+	default Color wrongPoisonFoodTextColor() { return Color.BLACK;}
+
+	@ConfigItem(
+		keyName = "highlightItems",
+		name = "Highlight called poison/bait",
+		description = "Highlights the poison or bait that was called by your teammate",
+		position = 10
+	)
+	default boolean highlightItems()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "highlightColor",
+		name = "Highlight color",
+		description = "Configures the color to highlight the called poison/bait",
+		position = 11
+	)
+	default Color highlightColor()
+	{
+		return Color.GREEN;
+	}
 }

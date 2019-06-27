@@ -24,12 +24,30 @@
  */
 package net.runelite.client.plugins.batools;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Stroke;
+import java.awt.image.BufferedImage;
+import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import net.runelite.api.GameState;
 import net.runelite.api.NPCComposition;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.Perspective;
+import net.runelite.api.Player;
+import net.runelite.api.Point;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.Overlay;
 import java.time.Duration;
@@ -37,6 +55,8 @@ import java.time.Instant;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.ImageUtil;
+
 @Slf4j
 
 public class BAToolsOverlay extends Overlay
@@ -51,76 +71,176 @@ public class BAToolsOverlay extends Overlay
 	private static final Color PURPLE = new Color(170, 0, 255);
 	private static final Color GRAY = new Color(158, 158, 158);
 
+	private static final int MAX_EGG_DISTANCE = 2500;
+	private static final int OFFSET_Z = 20;
+
 	private final BAToolsConfig config;
-	private Client client;
+	private final Client client;
+	private final ItemManager itemManager;
 	private BAToolsPlugin plugin;
+	@Getter
+	@Setter
+	private Round currentRound;
+
 
 	@Inject
-	public BAToolsOverlay(Client client, BAToolsPlugin plugin, BAToolsConfig config)
+	public BAToolsOverlay(Client client, ItemManager itemManager, BAToolsPlugin plugin, BAToolsConfig config)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.config = config;
 		this.client = client;
 		this.plugin = plugin;
+		this.itemManager = itemManager;
 	}
 
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if(!config.healerCodes())
+		if (client.getGameState() != GameState.LOGGED_IN || currentRound == null)
 		{
 			return null;
 		}
 
-		for (Healer healer : plugin.getHealers().values())
+		Role role = currentRound.getRoundRole();
+		if (role == null)
 		{
-			NPCComposition composition = healer.getNpc().getComposition();
-			Color color = composition.getCombatLevel() > 1 ? YELLOW : ORANGE;
-			if (composition.getConfigs() != null)
-			{
-				NPCComposition transformedComposition = composition.transform();
-				if (transformedComposition == null)
-				{
-					color = GRAY;
-				}
-				else
-				{
-					composition = transformedComposition;
-				}
-			}
-			int timeLeft = healer.getLastFoodTime() - (int)Duration.between(plugin.getWave_start(), Instant.now()).getSeconds();
-			timeLeft = timeLeft < 1 ? 0 : timeLeft;
+			return null;
+		}
 
-			if(healer.getFoodRemaining() > 1)
+		Widget roleText = client.getWidget(role.getRoleText());
+		Widget roleSprite = client.getWidget(role.getRoleSprite());
+
+		if (config.showTimer() && roleText != null && roleSprite != null)
+		{
+			if (config.showEggCountOverlay() && role.equals(Role.COLLECTOR))
 			{
-				color = GREEN;
+				roleText.setText(String.format("(%d) 00:%02d", plugin.getCollectedEggCount(), currentRound.getTimeToChange()));
 			}
-			else if(healer.getFoodRemaining() == 1)
+			else if (config.showHpCountOverlay() && role.equals(Role.HEALER))
 			{
-				if(timeLeft > 0)
-				{
-					color = RED;
-				}
-				else
-				{
-					color = GREEN;
-				}
+				roleText.setText(String.format("(%d) 00:%02d", plugin.getHpHealed(), currentRound.getTimeToChange()));
 			}
 			else
+			{
+				roleText.setText(String.format("00:%02d", currentRound.getTimeToChange()));
+			}
+			Rectangle spriteBounds = roleSprite.getBounds();
+			roleSprite.setHidden(true);
+		}
+
+		if (role == Role.COLLECTOR && config.highlightCollectorEggs()) {
+			String heardCall = plugin.getCollectorHeardCall();
+			Color highlightColor = plugin.getEggColor(heardCall);
+			Map<WorldPoint, Integer> calledEggMap = plugin.getCalledEggMap();
+			Map<WorldPoint, Integer> yellowEggMap = plugin.getYellowEggs();
+
+			if (calledEggMap != null) {
+				renderEggLocations(graphics, calledEggMap, highlightColor);
+			}
+
+			// Always show yellow eggs
+			renderEggLocations(graphics, yellowEggMap, Color.YELLOW);
+		}
+		Widget inventory = client.getWidget(WidgetInfo.INVENTORY);
+
+		if (config.highlightItems() && inventory != null && !inventory.isHidden() && ((role == Role.DEFENDER || role == Role.HEALER))) {
+			int listenItemId = plugin.getListenItemId(role.getListen());
+
+			if (listenItemId != -1) {
+				Color color = config.highlightColor();
+				BufferedImage highlight = ImageUtil.fillImage(itemManager.getImage(listenItemId), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
+
+				for (WidgetItem item : inventory.getWidgetItems())
+				{
+					if (item.getId() == listenItemId)
+					{
+						OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+					}
+				}
+			}
+		}
+
+		if(config.healerCodes())
+		{
+			for (Healer healer : plugin.getHealers().values()) {
+				NPCComposition composition = healer.getNpc().getComposition();
+				Color color = composition.getCombatLevel() > 1 ? YELLOW : ORANGE;
+				if (composition.getConfigs() != null) {
+					NPCComposition transformedComposition = composition.transform();
+					if (transformedComposition == null) {
+						color = GRAY;
+					} else {
+						composition = transformedComposition;
+					}
+				}
+				int timeLeft = healer.getLastFoodTime() - (int) Duration.between(plugin.getWave_start(), Instant.now()).getSeconds();
+				timeLeft = timeLeft < 1 ? 0 : timeLeft;
+
+				if (healer.getFoodRemaining() > 1) {
+					color = GREEN;
+				} else if (healer.getFoodRemaining() == 1) {
+					if (timeLeft > 0) {
+						color = RED;
+					} else {
+						color = GREEN;
+					}
+				} else {
+					continue;
+				}
+
+				String text = String.format("%d  %d",
+					   healer.getFoodRemaining(),
+					   timeLeft);
+
+
+				OverlayUtil.renderActorOverlay(graphics, healer.getNpc(), text, color);
+			}
+		}
+		return null;
+	}
+	private void renderEggLocations(Graphics2D graphics, Map<WorldPoint, Integer> eggMap, Color color)
+	{
+		Player player = client.getLocalPlayer();
+
+		if (player == null)
+		{
+			return;
+		}
+
+		final Stroke originalStroke = graphics.getStroke();
+
+		for (WorldPoint worldPoint : eggMap.keySet())
+		{
+			LocalPoint groundPoint = LocalPoint.fromWorld(client, worldPoint);
+
+			if (groundPoint == null)
+			{
+				continue;
+			}
+			if (player.getLocalLocation().distanceTo(groundPoint) > MAX_EGG_DISTANCE)
 			{
 				continue;
 			}
 
-			String text = String.format("%d  %d",
-				healer.getFoodRemaining(),
-				timeLeft);
+			Polygon poly = Perspective.getCanvasTilePoly(client, groundPoint);
 
+			if (poly == null)
+			{
+				continue;
+			}
 
-
-			OverlayUtil.renderActorOverlay(graphics, healer.getNpc(), text, color);
+			int quantity = eggMap.get(worldPoint);
+			String quantityText = "x" + quantity;
+			Point textPoint = Perspective.getCanvasTextLocation(client, graphics, groundPoint, quantityText, OFFSET_Z);
+			graphics.setColor(color);
+			graphics.setStroke(new BasicStroke(2));
+			graphics.drawPolygon(poly);
+			OverlayUtil.renderTextLocation(graphics, textPoint, quantityText, Color.WHITE);
 		}
-		return null;
+
+		graphics.setStroke(originalStroke);
 	}
+
 }

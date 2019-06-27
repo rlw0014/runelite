@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2018, Cameron <https://github.com/noremac201>
- * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,33 +22,54 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.batools;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+import lombok.Getter;
 
-@ConfigGroup("barbarianAssault")
-public interface BarbarianAssaultConfig extends Config
-{
-	@ConfigItem(
-		   keyName = "showTimer",
-		   name = "Show call change timer",
-		   description = "Show time to next call change"
-	)
-	default boolean showTimer()
+import java.util.HashMap;
+import java.util.Map;
+@Getter
+public enum Calls
+{   //Attacker Calls
+	RED_EGG("Red egg", "Tell-red"),
+	GREEN_EGG("Green egg", "Tell-green"),
+	BLUE_EGG("Blue egg", "Tell-blue"),
+	//Collector Calls
+	CONTROLLED("Controlled/Bullet/Wind", "Tell-controlled"),
+	ACCURATE("Accurate/Field/Water", "Tell-accurate"),
+	AGGRESSIVE("Aggressive/Blunt/Earth", "Tell-aggressive"),
+	DEFENSIVE("Defensive/Barbed/Fire", "Tell-defensive"),
+	//Healer Calls
+	TOFU("Tofu", "Tell-tofu"),
+	CRACKERS("Crackers", "Tell-crackers"),
+	WORMS("Worms", "Tell-worms"),
+	//Defender Calls
+	POIS_WORMS("Pois. Worms", "Tell-worms"),
+	POIS_TOFU("Pois. Tofu", "Tell-tofu"),
+	POIS_MEAT("Pois. Meat", "Tell-meat");
+
+	private final String call;
+	private final String option;
+
+	private static final Map<String, String> CALL_MENU = new HashMap<>();
+
+	static
 	{
-		return true;
+		for (Calls s : values())
+		{
+			CALL_MENU.put(s.getCall(), s.getOption());
+		}
 	}
 
-	@ConfigItem(
-		   keyName = "waveTimes",
-		   name = "Show wave and game duration",
-		   description = "Displays wave and game duration"
-	)
-	default boolean waveTimes()
+	Calls(String call, String option)
 	{
-		return true;
+		this.call = call;
+		this.option = option;
+	}
+
+	public static String getOption(String call)
+	{
+		return CALL_MENU.get(call);
 	}
 
 }

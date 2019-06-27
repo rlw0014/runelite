@@ -1,9 +1,8 @@
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.batools;
 
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.eventbus.Subscribe;
 

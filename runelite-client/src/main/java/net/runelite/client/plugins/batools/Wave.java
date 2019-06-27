@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.barbarianassault;
+package net.runelite.client.plugins.batools;
 
 import lombok.Getter;
 import net.runelite.api.Client;
