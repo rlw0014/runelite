@@ -121,12 +121,12 @@ public class ChatController
 	@GetMapping("/gc")
 	public int getKc(@RequestParam String name)
 	{
-		Integer kc = chatService.getGc(name);
-		if (kc == null)
+		Integer gc = chatService.getGc(name);
+		if (gc == null)
 		{
 			throw new NotFoundException();
 		}
-		return kc;
+		return gc;
 	}
 
 	@PostMapping("/task")
