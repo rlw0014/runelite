@@ -172,7 +172,7 @@ public interface MenuEntrySwapperConfig extends Config
 	@ConfigItem(
 		keyName = "swapHardWoodGrove",
 		name = "Hardwood Grove",
-		description =  "Swap Quick-Pay(100) and Send-Parcel at Hardwood Grove"
+		description = "Swap Quick-Pay(100) and Send-Parcel at Hardwood Grove"
 	)
 	default boolean swapHardWoodGrove()
 	{
