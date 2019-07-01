@@ -379,8 +379,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			swap("quick-start", option, target, true);
 		}
-		//Ctrl Healer
-    if(config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
+	    	if(config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
 		{
 			if(itemId == ItemID.LOGS && !target.contains("healing vial"))
 			{
@@ -442,6 +441,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				}
 			}
 		}
+		//Ctrl Healer
 		if(client.getWidget(WidgetInfo.BA_HEAL_CALL_TEXT) == getWidget() && lastHealer != 0 && inGameBit == 1 && config.ctrlHealer() && ctrlDown)
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
@@ -476,7 +476,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			}
 			client.setMenuEntries(entries.toArray(new MenuEntry[entries.size()]));
 		}
-
 		if (config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
 		{
 			if (itemId == ItemID.LOGS && !target.contains("healing vial"))
@@ -595,8 +594,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				}
 			}
 		}
-
-
 		if (config.healerGreenColor() && (event.getTarget().contains("Penance Healer")))
 		{
 
