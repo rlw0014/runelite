@@ -496,6 +496,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 						String item = target.split("-")[0].trim();
 						List<String> poison = Arrays.asList("poisoned tofu", "poisoned meat", "poisoned worms");
 						List<String> vials = Arrays.asList("healing vial", "healing vial(1)", "healing vial(2)", "healing vial(3)", "healing vial(4)");//"healing vial(4)"
+						List<String> objects = Arrays.asList("penance", "queen spawn", "launcher", "ladder", "machine", "egg", "arrow", "hammer", "logs", "trap", "converter", "cave");
 						if (poison.contains(item)) //if item is a poison item
 						{
 							int calledPoison = 0;
@@ -511,7 +512,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 									calledPoison = ItemID.POISONED_WORMS;
 									break;
 							}
-							System.out.println(target.equals(item));
+							//System.out.println(target.equals(item));
 							if (target.equals(item))//if targeting the item itself
 							{
 								if (calledPoison != 0 && itemId != calledPoison)//if no call or chosen item is not the called one
@@ -529,10 +530,16 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 
 							if (!target.equals(item))//if target is not the vial itself
 							{
-
-								if (!target.contains("level") || target.contains("penance") || target.contains("queen spawn"))//if someone has "penance" or "queen spawn" in their name, gg...
+								if (!(!target.contains("healer spring") || !target.contains("level")) || target.contains("penance"))
 								{
 									remove(option, target, true);
+								}
+								for (String str : objects)
+								{
+									if (target.contains(str))
+									{
+										remove(option, target, true);
+									}
 								}
 							}
 						}
