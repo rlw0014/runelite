@@ -42,20 +42,27 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import static net.runelite.api.Constants.CHUNK_SIZE;
 import net.runelite.api.ItemID;
 import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
 import static net.runelite.api.MenuAction.WALK;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.MessageNode;
 import net.runelite.api.NPC;
+import net.runelite.api.NpcID;
 import net.runelite.api.Prayer;
 import net.runelite.api.SoundEffectID;
 import net.runelite.api.Varbits;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ConfigChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.HitsplatApplied;
+import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetHiddenChanged;
 import net.runelite.api.events.WidgetLoaded;
@@ -151,6 +158,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		overlayManager.add(overlay);
 		healers = new HashMap<>();
 		wave_start = Instant.now();
+		lastInteracted = null;
 		foodPressed.clear();
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
@@ -175,23 +183,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
 		shiftDown = false;
-	}
-
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
-	{
-		switch (event.getGroupId())
-		{
-			case WidgetID.BA_REWARD_GROUP_ID:
-			{
-				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
-
-				if (rewardWidget != null && rewardWidget.getText().contains(ENDGAME_REWARD_NEEDLE_TEXT) && gameTime != null)
-				{
-					gameTime = null;
-				}
-			}
-		}
 	}
 
 	@Subscribe
@@ -251,6 +242,42 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
 			}
 
+		}
+		else
+		{
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_ONE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_TWO)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_THREE)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(false);
+			}
+			if(client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR)!=null)
+			{
+				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		switch (event.getGroupId())
+		{
+			case WidgetID.BA_REWARD_GROUP_ID:
+			{
+				Widget rewardWidget = client.getWidget(WidgetInfo.BA_REWARD_TEXT);
+
+				if (rewardWidget != null && rewardWidget.getText().contains("<br>5"))
+				{
+					tickNum = 0;
+				}
+			}
 		}
 	}
 
@@ -336,6 +363,76 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		inGameBit = inGame;
+	}
+
+	@Subscribe
+	public void onNpcSpawned(NpcSpawned event)
+	{
+		NPC npc = event.getNpc();
+
+		if (isNpcHealer(npc.getId()))
+		{
+			if (checkNewSpawn(npc) || Duration.between(wave_start, Instant.now()).getSeconds() < 16)
+			{
+				int currentWaveInt = Integer.parseInt(currentWave);
+				int spawnNumber = healers.size();
+				healers.put(npc, new Healer(npc, spawnNumber, currentWaveInt));
+				log.info("spawn number: " + spawnNumber + " on wave " + currentWave);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onHitsplatApplied(HitsplatApplied hitsplatApplied)
+	{
+		Actor actor = hitsplatApplied.getActor();
+
+		if (healers.isEmpty() && !(actor instanceof NPC) && lastInteracted == null)
+		{
+			return;
+		}
+
+		for (Healer healer : healers.values())
+		{
+			if (healer.getNpc() == actor && actor == lastInteracted)
+			{
+				healer.setFoodRemaining(healer.getFoodRemaining() - 1);
+			}
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned event)
+	{
+		if (healers.remove(event.getNpc()) != null && healers.isEmpty())
+		{
+			healers.clear();
+		}
+	}
+
+	@Subscribe
+	public void onInteractingChanged(InteractingChanged event)
+	{
+		Actor opponent = event.getTarget();
+
+		if (opponent != null && opponent instanceof NPC && isNpcHealer(((NPC) opponent).getId()) && event.getSource() != client.getLocalPlayer())
+		{
+			lastInteracted = opponent;
+		}
+	}
+
+	public static boolean isNpcHealer(int npcId)
+	{
+		return npcId == NpcID.PENANCE_HEALER ||
+			npcId == NpcID.PENANCE_HEALER_5766 ||
+			npcId == NpcID.PENANCE_HEALER_5767 ||
+			npcId == NpcID.PENANCE_HEALER_5768 ||
+			npcId == NpcID.PENANCE_HEALER_5769 ||
+			npcId == NpcID.PENANCE_HEALER_5770 ||
+			npcId == NpcID.PENANCE_HEALER_5771 ||
+			npcId == NpcID.PENANCE_HEALER_5772 ||
+			npcId == NpcID.PENANCE_HEALER_5773 ||
+			npcId == NpcID.PENANCE_HEALER_5774;
 	}
 
 	@Subscribe
@@ -889,6 +986,63 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		return -1;
+	}
+	private static WorldPoint rotate(WorldPoint point, int rotation)
+	{
+		int chunkX = point.getX() & ~(CHUNK_SIZE - 1);
+		int chunkY = point.getY() & ~(CHUNK_SIZE - 1);
+		int x = point.getX() & (CHUNK_SIZE - 1);
+		int y = point.getY() & (CHUNK_SIZE - 1);
+		switch (rotation)
+		{
+			case 1:
+				return new WorldPoint(chunkX + y, chunkY + (CHUNK_SIZE - 1 - x), point.getPlane());
+			case 2:
+				return new WorldPoint(chunkX + (CHUNK_SIZE - 1 - x), chunkY + (CHUNK_SIZE - 1 - y), point.getPlane());
+			case 3:
+				return new WorldPoint(chunkX + (CHUNK_SIZE - 1 - y), chunkY + x, point.getPlane());
+		}
+		return point;
+	}
+
+	private boolean checkNewSpawn(NPC npc)
+	{
+		int regionId = 7509;
+		int regionX = 42;
+		int regionY = 46;
+		int z = 0;
+
+		// world point of the tile marker
+		WorldPoint worldPoint = new WorldPoint(
+			   ((regionId >>> 8) << 6) + regionX,
+			   ((regionId & 0xff) << 6) + regionY,
+			   z
+		);
+
+		int[][][] instanceTemplateChunks = client.getInstanceTemplateChunks();
+		for (int x = 0; x < instanceTemplateChunks[z].length; ++x)
+		{
+			for (int y = 0; y < instanceTemplateChunks[z][x].length; ++y)
+			{
+				int chunkData = instanceTemplateChunks[z][x][y];
+				int rotation = chunkData >> 1 & 0x3;
+				int templateChunkY = (chunkData >> 3 & 0x7FF) * CHUNK_SIZE;
+				int templateChunkX = (chunkData >> 14 & 0x3FF) * CHUNK_SIZE;
+				if (worldPoint.getX() >= templateChunkX && worldPoint.getX() < templateChunkX + CHUNK_SIZE
+					   && worldPoint.getY() >= templateChunkY && worldPoint.getY() < templateChunkY + CHUNK_SIZE)
+				{
+					WorldPoint p = new WorldPoint(client.getBaseX() + x * CHUNK_SIZE + (worldPoint.getX() & (CHUNK_SIZE - 1)),
+						   client.getBaseY() + y * CHUNK_SIZE + (worldPoint.getY() & (CHUNK_SIZE - 1)),
+						   worldPoint.getPlane());
+					p = rotate(p, rotation);
+					if (p.distanceTo(npc.getWorldLocation()) < 5)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
