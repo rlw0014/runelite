@@ -79,6 +79,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -161,6 +162,11 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		foodPressed.clear();
 		client.setInventoryDragDelay(config.antiDragDelay());
 		keyManager.registerKeyListener(this);
+		lastHealer = 0;
+		fighterImage = ImageUtil.getResourceStreamFromClass(getClass(), "fighter.png");
+		rangerImage = ImageUtil.getResourceStreamFromClass(getClass(), "ranger.png");
+		runnerImage = ImageUtil.getResourceStreamFromClass(getClass(), "runner.png");
+		healerImage = ImageUtil.getResourceStreamFromClass(getClass(), "healer.png");
 	}
 
 	@Override
@@ -171,6 +177,9 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		inGameBit = 0;
 		lastInteracted = null;
 		overlayManager.remove(overlay);
+		inGameBit = 0;
+		gameTime = null;
+		currentWave = START_WAVE;
 		client.setInventoryDragDelay(5);
 		keyManager.unregisterKeyListener(this);
 		shiftDown = false;
@@ -181,31 +190,31 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 	{
 		Widget weapon = client.getWidget(593, 1);
 
-		if(config.attackStyles()
-			&& weapon!=null
+		if (config.attackStyles()
+			&& weapon != null
 			&& inGameBit == 1
 			&& (weapon.getText().contains("Crystal halberd") || weapon.getText().contains("Dragon claws"))
-			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT)!=null)
+			&& client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT) != null)
 		{
 			String style = client.getWidget(WidgetInfo.BA_ATK_LISTEN_TEXT).getText();
 
-			if(style.contains("Defensive"))
+			if (style.contains("Defensive"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(false);
 			}
-			else if(style.contains("Aggressive"))
+			else if (style.contains("Aggressive"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(false);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
 			}
-			else if(style.contains("Controlled"))
+			else if (style.contains("Controlled"))
 			{
-				if(weapon.getText().contains("Crystal halberd"))
+				if (weapon.getText().contains("Crystal halberd"))
 				{
 					client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
 					client.getWidget(WidgetInfo.COMBAT_STYLE_THREE).setHidden(true);
@@ -218,7 +227,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_FOUR).setHidden(true);
 			}
-			else if(style.contains("Accurate") && weapon.getText().contains("Dragon claws"))
+			else if (style.contains("Accurate") && weapon.getText().contains("Dragon claws"))
 			{
 				client.getWidget(WidgetInfo.COMBAT_STYLE_ONE).setHidden(false);
 				client.getWidget(WidgetInfo.COMBAT_STYLE_TWO).setHidden(true);
@@ -349,6 +358,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			else
 			{
 				addCounter();
+				lastHealer = 0;
 			}
 		}
 
