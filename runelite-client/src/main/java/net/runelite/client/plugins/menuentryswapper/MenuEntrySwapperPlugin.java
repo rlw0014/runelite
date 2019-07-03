@@ -55,7 +55,6 @@ import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.barbarianassault.BarbarianAssaultPlugin;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -363,42 +362,13 @@ public class MenuEntrySwapperPlugin extends Plugin
 		final int eventId = event.getIdentifier();
 		final String option = Text.removeTags(event.getOption()).toLowerCase();
 		final String target = Text.removeTags(event.getTarget()).toLowerCase();
-		final NPC hintArrowNpc = client.getHintArrowNpc();
+		final NPC hintArrowNpc  = client.getHintArrowNpc();
 
 		if (hintArrowNpc != null
 			&& hintArrowNpc.getIndex() == eventId
 			&& NPC_MENU_TYPES.contains(MenuAction.of(event.getType())))
 		{
 			return;
-		}
-		if (config.swapDestroyEggs() & (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
-        	{
-            	swap("destroy", option, target, false);
-        	}
-		if (config.swapCollectorBag() & target.equals("collection bag"))
-		{
-			swap("empty", option, target, false);
-		}
-		if (config.shiftWalkHere() && shiftModifier &&
-				!option.equals("Stock-Up") && !option.equals("Take-Vial") &&
-				!option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
-				!option.equals("Take-Meat") &&
-	    			!target.contains("nuff"))
-		{
-		 // Keep moving 'Walk here' to the end of the entries (left-click option)
-		 MenuEntry[] entries = client.getMenuEntries();
-		 int walkIdx = searchIndex(entries, "Walk here", "", false);
-
-		 if (walkIdx > 0 && walkIdx <= entries.length)
-			{
-				MenuEntry walkHere = entries[walkIdx];
-				MenuEntry currentTop = entries[entries.length - 1];
-
-				entries[walkIdx] = currentTop;
-				entries[entries.length - 1] = walkHere;
-
-				client.setMenuEntries(entries);
-			}
 		}
 
 		if (option.equals("talk-to"))
@@ -484,50 +454,6 @@ public class MenuEntrySwapperPlugin extends Plugin
 			if (config.swapQuick())
 			{
 				swap("quick-travel", option, target, true);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("guild trophy space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mythical cape") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("table space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mahogany table") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
 			}
 		}
 		else if (config.swapTravel() && option.equals("pass") && target.equals("energy barrier"))
