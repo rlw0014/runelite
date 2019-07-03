@@ -751,11 +751,7 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		{
 			swap("empty", option, target, false);
 		}
-		if (config.shiftWalkHere() && shiftDown &&
-			   !option.equals("Stock-Up") && !option.equals("Take-Vial") &&
-			   !option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
-			   !option.equals("Take-Meat") &&
-			   !target.contains("nuff"))
+		if (config.shiftWalkHere() && shiftDown && !event.getTarget().equals("<col=ffff>Healer item machine"))
 		{
 			// Keep moving 'Walk here' to the end of the entries (left-click option)
 			MenuEntry[] entries = client.getMenuEntries();
