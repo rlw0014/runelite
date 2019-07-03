@@ -471,11 +471,6 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 			}
 		}
 
-		//Ladder swap
-		if (config.swapLadder() && option.equals("climb-down") && target.equals("ladder"))
-		{
-			swap("quick-start", option, target, true);
-		}
 	    	if(config.removeBA() && client.getVar(Varbits.IN_GAME_BA) == 1 && !option.contains("tell-"))//if in barbarian assault and menu isnt from a horn
 		{
 			if(itemId == ItemID.LOGS && !target.contains("healing vial"))

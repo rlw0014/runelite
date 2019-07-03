@@ -53,16 +53,6 @@ public interface BAToolsConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "swapLadder",
-		name = "Swap ladder option",
-		description = "Swap Climb-down with Quick-start in the wave lobbies"
-	)
-	default boolean swapLadder()
-	{
-		return true;
-	}
-
-	@ConfigItem(
 		keyName = "healerMenuOption",
 		name = "Healer menu options",
 		description = "Shows time since last food placed on healer"
