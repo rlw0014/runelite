@@ -743,18 +743,36 @@ public class BAToolsPlugin extends Plugin implements KeyListener
 		}
 
 		//Attacker shift to walk here
-		if (config.shiftWalkHere() && shiftDown)
+		if (config.swapDestroyEggs() & (target.equals("red egg") || target.equals("green egg") || target.equals("blue egg")))
 		{
-			if (event.getType() < WALK.getId())
-			{
-				MenuEntry[] menuEntries = client.getMenuEntries();
-				MenuEntry menuEntry = menuEntries[menuEntries.length - 1];
-				menuEntry.setType(event.getType() + MENU_ACTION_DEPRIORITIZE_OFFSET);
-
-				client.setMenuEntries(menuEntries);
-			}
-			return;
+			swap("destroy", option, target, false);
 		}
+		if (config.swapCollectorBag() & target.equals("collection bag"))
+		{
+			swap("empty", option, target, false);
+		}
+		if (config.shiftWalkHere() && shiftDown &&
+			   !option.equals("Stock-Up") && !option.equals("Take-Vial") &&
+			   !option.equals("Take-Tofu") && !option.equals("Take-Worms") &&
+			   !option.equals("Take-Meat") &&
+			   !target.contains("nuff"))
+		{
+			// Keep moving 'Walk here' to the end of the entries (left-click option)
+			MenuEntry[] entries = client.getMenuEntries();
+			int walkIdx = searchIndex(entries, "Walk here", "", false);
+
+			if (walkIdx > 0 && walkIdx <= entries.length)
+			{
+				MenuEntry walkHere = entries[walkIdx];
+				MenuEntry currentTop = entries[entries.length - 1];
+
+				entries[walkIdx] = currentTop;
+				entries[entries.length - 1] = walkHere;
+
+				client.setMenuEntries(entries);
+			}
+		}
+
 
 
 		//Shift healer OS

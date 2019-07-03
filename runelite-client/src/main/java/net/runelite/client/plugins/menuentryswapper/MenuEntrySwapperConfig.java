@@ -298,37 +298,4 @@ public interface MenuEntrySwapperConfig extends Config
 	{
 		return true;
 	}
-
-	@ConfigItem(
-		position = 19,
-		keyName = "shiftWalkHere",
-		name = "Shift-Click Walk here",
-		description = "Make Walk here the left-click option when holding shift"
-	)
-	default boolean shiftWalkHere()
-	{
-		return false;
-	}
-
-	@ConfigItem(
-			position = 20,
-			keyName = "swapCollectorBag",
-			name = "swaps collector bag in ba to empty left click",
-			description = "Make empty the left-click option on collector bag"
-	)
-	default boolean swapCollectorBag()
-    {
-        return false;
-    }
-
-    @ConfigItem(
-            position = 21,
-            keyName = "swapDestroyEggs",
-            name = "Left click destroy eggs in BA",
-            description = "Make destroy the left-click option for collector eggs"
-    )
-    default boolean swapDestroyEggs()
-    {
-        return false;
-    }
 }
