@@ -55,7 +55,6 @@ import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.barbarianassault.BarbarianAssaultPlugin;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -363,7 +362,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		final int eventId = event.getIdentifier();
 		final String option = Text.removeTags(event.getOption()).toLowerCase();
 		final String target = Text.removeTags(event.getTarget()).toLowerCase();
-		final NPC hintArrowNpc = client.getHintArrowNpc();
+		final NPC hintArrowNpc  = client.getHintArrowNpc();
 
 		if (hintArrowNpc != null
 			&& hintArrowNpc.getIndex() == eventId
@@ -371,6 +370,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		{
 			return;
 		}
+
 		if (option.equals("talk-to"))
 		{
 			if (config.swapPickpocket() && target.contains("h.a.m."))
@@ -454,50 +454,6 @@ public class MenuEntrySwapperPlugin extends Plugin
 			if (config.swapQuick())
 			{
 				swap("quick-travel", option, target, true);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("guild trophy space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mythical cape") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("table space") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "build", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
-			}
-		}
-		else if (config.swapConstruction() && target.equals("mahogany table") && option.equals("examine"))
-		{
-			MenuEntry[] entries = client.getMenuEntries();
-			int idx = searchIndex(entries, "remove", target, true);
-			if (idx>=0) {
-				for (int i = 0; i < entries.length; i++) {
-					entries[i] = entries[idx];
-				}
-				client.setMenuEntries(entries);
 			}
 		}
 		else if (config.swapTravel() && option.equals("pass") && target.equals("energy barrier"))
