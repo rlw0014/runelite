@@ -589,6 +589,14 @@ public class BarbarianAssaultPlugin extends Plugin
 					return ItemID.POISONED_TOFU;
 				case "Pois. Meat":
 					return ItemID.POISONED_MEAT;
+				case "Bullet/Wind":
+					return ItemID.BULLET_ARROW;
+				case "Field/Water":
+					return ItemID.FIELD_ARROW;
+				case "Blunt/Earth":
+					return ItemID.BLUNT_ARROW;
+				case "Barbed/Fire":
+					return ItemID.BARBED_ARROW;
 			}
 		}
 

@@ -135,18 +135,38 @@ class BarbarianAssaultOverlay extends Overlay
 		}
 		Widget inventory = client.getWidget(WidgetInfo.INVENTORY);
 
-		if (config.highlightItems() && inventory != null && !inventory.isHidden() && ((role == Role.DEFENDER || role == Role.HEALER))) {
-			int listenItemId = plugin.getListenItemId(role.getListen());
+		if (config.highlightItems() && inventory != null && !inventory.isHidden()) {
+			if ((role == Role.DEFENDER || role == Role.HEALER))
+			{
+				int listenItemId = plugin.getListenItemId(role.getListen());
 
-			if (listenItemId != -1) {
-				Color color = config.highlightColor();
-				BufferedImage highlight = ImageUtil.fillImage(itemManager.getImage(listenItemId), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
+				if (listenItemId != -1) {
+					Color color = config.highlightColor();
+					BufferedImage highlight = ImageUtil.fillImage(itemManager.getImage(listenItemId), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
 
-				for (WidgetItem item : inventory.getWidgetItems())
-				{
-					if (item.getId() == listenItemId)
+					for (WidgetItem item : inventory.getWidgetItems())
 					{
-						OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						if (item.getId() == listenItemId)
+						{
+							OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						}
+					}
+				}
+			}
+			if (role == Role.ATTACKER)
+			{
+				int listenItemId = plugin.getListenItemId(role.getListen());
+				if (listenItemId != -1)
+				{
+					Color color = config.highlightColor();
+
+					for (WidgetItem item : inventory.getWidgetItems())
+					{
+						if (item.getId() == listenItemId)
+						{
+							BufferedImage highlight = ImageUtil.fillImage(itemManager.getItemOutline(listenItemId, item.getQuantity(), color), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
+							OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						}
 					}
 				}
 			}

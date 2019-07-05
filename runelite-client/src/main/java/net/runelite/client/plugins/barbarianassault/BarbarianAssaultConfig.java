@@ -99,7 +99,7 @@ public interface BarbarianAssaultConfig extends Config
 
     @ConfigItem(
 			keyName = "highlightItems",
-			name = "Highlight called poison/bait",
+			name = "Highlight called poison/bait/arrows",
 			description = "Highlights the poison or bait that was called by your teammate",
 			position = 10
 	)
@@ -111,7 +111,7 @@ public interface BarbarianAssaultConfig extends Config
 	@ConfigItem(
 			keyName = "highlightColor",
 			name = "Highlight color",
-			description = "Configures the color to highlight the called poison/bait",
+			description = "Configures the color to highlight the called poison/bait/arrows",
 			position = 11
 	)
 	default Color highlightColor()
