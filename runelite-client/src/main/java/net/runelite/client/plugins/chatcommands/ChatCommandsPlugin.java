@@ -99,8 +99,8 @@ public class ChatCommandsPlugin extends Plugin
 	private static final String KILLCOUNT_COMMAND_STRING = "!kc";
 	private static final String CMB_COMMAND_STRING = "!cmb";
 	private static final String QP_COMMAND_STRING = "!qp";
-	private static final String GC_COMMAND_STRING = "!gc";
 	private static final String PB_COMMAND = "!pb";
+	private static final String GC_COMMAND_STRING = "!gc";
 	private static final String DUEL_ARENA_COMMAND = "!duels";
 
 	private final HiscoreClient hiscoreClient = new HiscoreClient();
