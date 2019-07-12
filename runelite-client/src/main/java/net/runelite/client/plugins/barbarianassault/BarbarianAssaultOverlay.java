@@ -70,6 +70,10 @@ class BarbarianAssaultOverlay extends Overlay
 	@Setter
 	private Round currentRound;
 
+	private boolean hasPlayed = false;
+	private int counter = 3;
+	private final int STAMINA_POTION_EXPIRATION_SOUND_ID = 3120;
+
 
 	@Inject
 	private BarbarianAssaultOverlay(Client client, ItemManager itemManager, BarbarianAssaultPlugin plugin, BarbarianAssaultConfig config)
@@ -118,6 +122,25 @@ class BarbarianAssaultOverlay extends Overlay
 			Rectangle spriteBounds = roleSprite.getBounds();
 			roleSprite.setHidden(true);
 			graphics.drawImage(plugin.getClockImage(), spriteBounds.x, spriteBounds.y, null);
+
+			if (config.playEndCallSoundEffect())
+			{
+				hasPlayed = false;
+				if (getCurrentRound() != null && !hasPlayed)
+				{
+					long time = getCurrentRound().getTimeToChange();
+					if (time <= 3 && counter == time)
+					{
+						client.playSoundEffect(STAMINA_POTION_EXPIRATION_SOUND_ID);
+						hasPlayed = true;
+						counter--;
+						if (counter == 0)
+						{
+							counter = 3;
+						}
+					}
+				}
+			}
 		}
 
 		if (role == Role.COLLECTOR && config.highlightCollectorEggs()) {
@@ -135,18 +158,38 @@ class BarbarianAssaultOverlay extends Overlay
 		}
 		Widget inventory = client.getWidget(WidgetInfo.INVENTORY);
 
-		if (config.highlightItems() && inventory != null && !inventory.isHidden() && ((role == Role.DEFENDER || role == Role.HEALER))) {
-			int listenItemId = plugin.getListenItemId(role.getListen());
+		if (config.highlightItems() && inventory != null && !inventory.isHidden()) {
+			if ((role == Role.DEFENDER || role == Role.HEALER))
+			{
+				int listenItemId = plugin.getListenItemId(role.getListen());
 
-			if (listenItemId != -1) {
-				Color color = config.highlightColor();
-				BufferedImage highlight = ImageUtil.fillImage(itemManager.getImage(listenItemId), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
+				if (listenItemId != -1) {
+					Color color = config.highlightColor();
+					BufferedImage highlight = ImageUtil.fillImage(itemManager.getImage(listenItemId), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
 
-				for (WidgetItem item : inventory.getWidgetItems())
-				{
-					if (item.getId() == listenItemId)
+					for (WidgetItem item : inventory.getWidgetItems())
 					{
-						OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						if (item.getId() == listenItemId)
+						{
+							OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						}
+					}
+				}
+			}
+			if (role == Role.ATTACKER)
+			{
+				int listenItemId = plugin.getListenItemId(role.getListen());
+				if (listenItemId != -1)
+				{
+					Color color = config.highlightColor();
+
+					for (WidgetItem item : inventory.getWidgetItems())
+					{
+						if (item.getId() == listenItemId)
+						{
+							BufferedImage highlight = ImageUtil.fillImage(itemManager.getItemOutline(listenItemId, item.getQuantity(), color), new Color(color.getRed(), color.getGreen(), color.getBlue(), 150));
+							OverlayUtil.renderImageLocation(graphics, item.getCanvasLocation(), highlight);
+						}
 					}
 				}
 			}

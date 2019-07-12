@@ -50,28 +50,12 @@ public interface BarbarianAssaultConfig extends Config
 	default boolean waveTimes() { return true; }
 
     @ConfigItem(
-        keyName = "showEggCountMessage",
-        name = "Show count of eggs collected as collector.",
-        description = "Display egg count as collector after each wave",
-        position = 2
-    )
-    default boolean showEggCount() { return false; }
-
-    @ConfigItem(
         keyName = "showEggCountOverlay",
         name = "Overlay of eggs counted",
         description = "Display current egg count as collector",
         position = 3
     )
     default boolean showEggCountOverlay() { return false; }
-
-    @ConfigItem(
-        keyName = "showHpCountMessage",
-        name = "Show count of Hp healed as healer.",
-        description = "Display healed count as healer after each wave",
-        position = 4
-    )
-    default boolean showHpCount() { return false; }
 
 	@ConfigItem(
 			keyName = "showHpCountOverlay",
@@ -95,7 +79,7 @@ public interface BarbarianAssaultConfig extends Config
 			description = "Displays total eggs/healed hp and missed attacks/lost runners",
 			position = 7
 	)
-	default boolean showTotalRewards(){ return false; };
+	default boolean showTotalRewards(){ return false; }
 
 	@ConfigItem(
 			keyName = "showSummaryOfPoints",
@@ -103,7 +87,7 @@ public interface BarbarianAssaultConfig extends Config
 			description = "Gives summary of advanced points breakdown in chat log",
 			position = 8
     )
-	default boolean showSummaryOfPoints() { return false; };
+	default boolean showSummaryOfPoints() { return false; }
 
 	@ConfigItem(
 			keyName = "wrongPoisonFoodTextColor",
@@ -115,7 +99,7 @@ public interface BarbarianAssaultConfig extends Config
 
     @ConfigItem(
 			keyName = "highlightItems",
-			name = "Highlight called poison/bait",
+			name = "Highlight called poison/bait/arrows",
 			description = "Highlights the poison or bait that was called by your teammate",
 			position = 10
 	)
@@ -127,11 +111,21 @@ public interface BarbarianAssaultConfig extends Config
 	@ConfigItem(
 			keyName = "highlightColor",
 			name = "Highlight color",
-			description = "Configures the color to highlight the called poison/bait",
+			description = "Configures the color to highlight the called poison/bait/arrows",
 			position = 11
 	)
 	default Color highlightColor()
 	{
 		return Color.GREEN;
+	}
+
+	@ConfigItem(
+		   keyName = "EndCallSoundEffect",
+		   name = "End of Call Sound",
+		   description = "Plays a sound before call changes"
+	)
+	default boolean playEndCallSoundEffect()
+	{
+		return true;
 	}
 }
