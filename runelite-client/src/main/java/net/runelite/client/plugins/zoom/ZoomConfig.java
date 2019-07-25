@@ -34,6 +34,8 @@ public interface ZoomConfig extends Config
 {
 	int OUTER_LIMIT_MIN = -400;
 	int OUTER_LIMIT_MAX = 400;
+	int ZOOM_VALUE_MIN = -272;
+	int ZOOM_VALUE_MAX = 1004;
 
 	@ConfigItem(
 		keyName = "inner",
@@ -90,8 +92,8 @@ public interface ZoomConfig extends Config
 		position = 5
 	)
 	@Range(
-		min = OUTER_LIMIT_MIN,
-		max = OUTER_LIMIT_MAX
+		min = ZOOM_VALUE_MIN,
+		max = ZOOM_VALUE_MAX
 	)
 	default int ctrlZoomValue()
 	{
