@@ -34,7 +34,7 @@ public interface BASConfig extends Config
 {
 	@ConfigItem(
 			keyName = "autoUpdateQueue",
-			name = "Queue Auto-updater",
+			name = "Queue Auto Updater",
 			description = "Automatically updates the BAS Queue",
 			position = 1
 	)
@@ -70,7 +70,7 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "addToQueue",
-			name = "Shift add to queue options",
+			name = "Shift Add To Queue Options",
 			description = "Hold shift to view more options that allow adding customers directly to the queue",
 			position = 4
 	)
@@ -81,7 +81,7 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "getNextCustomer",
-			name = "Get next customer option",
+			name = "Get Next Customer Option",
 			description = "Button to announce the next customer (replaces Clan Setup button)",
 			position = 5
 	)
@@ -91,10 +91,21 @@ public interface BASConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "torsoOptions",
-			name = "Torso Options",
-			description = "Show options to add Torso when \"Shift add to queue options\" is enabled",
+			keyName = "queueName",
+			name = "Queue Sheet Name",
+			description = "The name that you would like the queue to recognise you as. If not set it will use the currently logged in username.",
 			position = 6
+	)
+	default String queueName()
+	{
+		return "";
+	}
+
+	@ConfigItem(
+			keyName = "torsoOptions",
+			name = "Options - Torso",
+			description = "Show options to add Torso when \"Shift add to queue options\" is enabled",
+			position = 7
 	)
 	default boolean torsoOptions()
 	{
@@ -103,9 +114,9 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "hatOptions",
-			name = "Hat Options",
+			name = "Options - Hat",
 			description = "Show options to add Hat when \"Shift add to queue options\" is enabled",
-			position = 7
+			position = 8
 	)
 	default boolean hatOptions()
 	{
@@ -114,9 +125,9 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "qkOptions",
-			name = "Queen Kill Options",
+			name = "Options - Queen Kill",
 			description = "Show options to add Queen Kill when \"Shift add to queue options\" is enabled",
-			position = 8
+			position = 9
 	)
 	default boolean qkOptions()
 	{
@@ -125,9 +136,9 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "OneROptions",
-			name = "One Round Options",
+			name = "Options - One Round",
 			description = "Show options to add One Round - Points when \"Shift add to queue options\" is enabled",
-			position = 9
+			position = 10
 	)
 	default boolean OneROptions()
 	{
@@ -136,24 +147,13 @@ public interface BASConfig extends Config
 
 	@ConfigItem(
 			keyName = "Lvl5Options",
-			name = "Level 5 Roles Options",
+			name = "Options - Level 5 Roles",
 			description = "Show options to add Level 5 Roles when \"Shift add to queue options\" is enabled",
-			position = 10
+			position = 11
 	)
 	default boolean Lvl5Options()
 	{
 		return false;
-	}
-
-	@ConfigItem(
-			keyName = "queueName",
-			name = "Queue sheet name",
-			description = "The name that you would like the queue to recognise you as. If not set it will use the currently logged in username.",
-			position = 11
-	)
-	default String queueName()
-	{
-		return "";
 	}
 
 
