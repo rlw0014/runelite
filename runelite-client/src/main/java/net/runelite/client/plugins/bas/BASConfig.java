@@ -67,23 +67,11 @@ public interface BASConfig extends Config
 		return false;
 	}
 
-
-	@ConfigItem(
-			keyName = "addToQueue",
-			name = "Shift Add To Queue Options",
-			description = "Hold shift to view more options that allow adding customers directly to the queue",
-			position = 4
-	)
-	default boolean addToQueue()
-	{
-		return false;
-	}
-
 	@ConfigItem(
 			keyName = "getNextCustomer",
 			name = "Get Next Customer Option",
 			description = "Button to announce the next customer (replaces Clan Setup button)",
-			position = 5
+			position = 4
 	)
 	default boolean getNextCustomer()
 	{
@@ -94,11 +82,22 @@ public interface BASConfig extends Config
 			keyName = "queueName",
 			name = "Queue Sheet Name",
 			description = "The name that you would like the queue to recognise you as. If not set it will use the currently logged in username.",
-			position = 6
+			position = 5
 	)
 	default String queueName()
 	{
 		return "";
+	}
+
+	@ConfigItem(
+			keyName = "addToQueue",
+			name = "Shift Add To Queue Options",
+			description = "Hold shift to view more options that allow adding customers directly to the queue",
+			position = 6
+	)
+	default boolean addToQueue()
+	{
+		return false;
 	}
 
 	@ConfigItem(
