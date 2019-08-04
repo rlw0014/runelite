@@ -75,7 +75,7 @@ public interface BASConfig extends Config
 	)
 	default boolean getNextCustomer()
 	{
-		return false;
+		return true;
 	}
 
 	@ConfigItem(
