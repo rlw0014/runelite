@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ObjectArrays;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.io.BufferedReader;
@@ -53,6 +54,7 @@ import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ClanMemberJoined;
 import net.runelite.api.events.ClanMemberLeft;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.MenuEntryAdded;
@@ -93,6 +95,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	private static final String BUY_HAT_PREM = "Prem Hat";
 	private static final String BUY_1R_REG = "Reg 1R Points";
 	private static final String BUY_1R_PREM = "Prem 1R Points";
+	private static final int clanSetupWidgetID = 24;
 	private static final ImmutableList<String> BAS_OPTIONS = ImmutableList.of(MARK_DONE, MARK_INPROGRESS, MARK_NOTINPROGRESS);
 	private static final ImmutableList<String> BAS_BUY_OPTIONS = ImmutableList.of(BUY_1R_PREM,BUY_1R_REG,BUY_HAT_PREM,BUY_HAT_REG,BUY_QK_PREM,BUY_QK_REG,BUY_LVL5_PREM
 	,BUY_LVL5_REG,BUY_TORSO_PREM,BUY_TORSO_REG);
@@ -155,6 +158,15 @@ public class BASPlugin extends Plugin implements KeyListener
 			ccUpdate();
 			ccCount=client.getClanChatCount();
 		}
+		if(config.getNextCustomer())
+		{
+			Widget clanSetupWidget = client.getWidget(WidgetID.CLAN_CHAT_GROUP_ID, clanSetupWidgetID);
+			if(clanSetupWidget!=null)
+			{
+				clanSetupWidget.setText("Next Customer");
+				clanSetupWidget.setHasListener(false);
+			}
+		}
 	}
 
     @Subscribe
@@ -179,6 +191,15 @@ public class BASPlugin extends Plugin implements KeyListener
 				groupId == WidgetInfo.CHATBOX.getGroupId() && !KICK_OPTION.equals(option)//prevent from adding for Kick option (interferes with the raiding party one)
 				)
 		{
+			if(config.getNextCustomer() && groupId == WidgetInfo.CLAN_CHAT.getGroupId() && WidgetInfo.TO_CHILD(event.getActionParam1())==clanSetupWidgetID && client.getClanOwner().equals(ccName) && !client.getUsername().equals(client.getClanOwner()))
+			{
+				MenuEntry[] menu = client.getMenuEntries();
+				menu[1].setOption("Next-customer");
+				menu[1].setParam0(0);
+				menu[1].setParam1(0);
+				client.setMenuEntries(menu);
+			}
+
 			if (!AFTER_OPTIONS.contains(option))
 			{
 				return;
@@ -272,6 +293,67 @@ public class BASPlugin extends Plugin implements KeyListener
 
 	}
 
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		if(event.getMenuOption().equals("Next-customer"))
+		{
+			getNextCustomer();
+		}
+	}
+
+	private void getNextCustomer()
+	{
+		log.info("Retrieving next customer");
+
+		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+
+		HttpUrl httpUrl = new HttpUrl.Builder()
+				.scheme("http")
+				.host("blairm.net")
+				.addPathSegment("bas")
+				.addPathSegment("update.php")
+				.addQueryParameter("n", "1")
+				.build();
+
+		Request request = new Request.Builder()
+				.header("User-Agent", "RuneLite")
+				.url(httpUrl)
+				.build();
+
+		httpClient.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException
+			{
+				BufferedReader in = new BufferedReader(new StringReader(response.body().string()));
+				String s;
+				String CustId = "";
+				while ((s = in.readLine()) != null)
+				{
+					CustId = s;
+				}
+				final String chatMessage = new ChatMessageBuilder()
+						.append(ChatColorType.NORMAL)
+						.append("Next customer in line: ")
+						.append(ChatColorType.HIGHLIGHT)
+						.append(CustId)
+						.build();
+
+				chatMessageManager.queue(QueuedMessage.builder()
+						.type(ChatMessageType.CONSOLE)
+						.runeLiteFormattedMessage(chatMessage)
+						.build());
+
+			}
+		});
+	}
 	private void addCustomerToQueue(String name, String item)
 	{
 		if(client.getLocalPlayer().getName()==null)
@@ -603,9 +685,8 @@ public class BASPlugin extends Plugin implements KeyListener
 				csvContent.clear();
 				while ((s = in.readLine()) != null)
 				{
-
 					String[] splitString = s.split(",");
-					if(splitString.length>1)
+					if(splitString.length>5)
 					{
 						csvContent.add(new String[]{splitString[2], splitString[2].equals("R") ? splitString[4] : splitString[3], splitString[0]});
 					}
