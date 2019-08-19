@@ -191,13 +191,13 @@ public class BASPlugin extends Plugin implements KeyListener
 				groupId == WidgetInfo.CHATBOX.getGroupId() && !KICK_OPTION.equals(option)//prevent from adding for Kick option (interferes with the raiding party one)
 				)
 		{
-			if(config.getNextCustomer() && groupId == WidgetInfo.CLAN_CHAT.getGroupId() && WidgetInfo.TO_CHILD(event.getActionParam1())==clanSetupWidgetID && client.getClanOwner().equals(ccName) && !client.getUsername().equals(client.getClanOwner()))
+			if(config.getNextCustomer() && groupId == WidgetInfo.CLAN_CHAT.getGroupId() && WidgetInfo.TO_CHILD(event.getActionParam1())==clanSetupWidgetID && client.getClanOwner().equals(ccName))
 			{
-				MenuEntry[] menu = client.getMenuEntries();
-				menu[1].setOption("Next-customer");
-				menu[1].setParam0(0);
-				menu[1].setParam1(0);
-				client.setMenuEntries(menu);
+				MenuEntry newMenu = client.getMenuEntries()[1];
+				newMenu.setOption("Next-customer");
+				newMenu.setParam0(0);
+				newMenu.setParam1(0);
+				insertMenuEntry(newMenu, client.getMenuEntries(), false);
 			}
 
 			if (!AFTER_OPTIONS.contains(option))
@@ -217,7 +217,7 @@ public class BASPlugin extends Plugin implements KeyListener
 					menuOption.setParam1(event.getActionParam1());
 					menuOption.setIdentifier(event.getIdentifier());
 
-					insertMenuEntry(menuOption, client.getMenuEntries());
+					insertMenuEntry(menuOption, client.getMenuEntries(), true);
 				}
 			}
 			else if(shiftDown && config.addToQueue())
@@ -240,7 +240,7 @@ public class BASPlugin extends Plugin implements KeyListener
 						menuOption.setParam1(event.getActionParam1());
 						menuOption.setIdentifier(event.getIdentifier());
 
-						insertMenuEntry(menuOption, client.getMenuEntries());
+						insertMenuEntry(menuOption, client.getMenuEntries(), true);
 					}
 				}
 			}
@@ -503,11 +503,14 @@ public class BASPlugin extends Plugin implements KeyListener
 
 	}
 
-	private void insertMenuEntry(MenuEntry newEntry, MenuEntry[] entries)
+	private void insertMenuEntry(MenuEntry newEntry, MenuEntry[] entries, boolean swap)
 	{
 		MenuEntry[] newMenu = ObjectArrays.concat(entries, newEntry);
 		int menuEntryCount = newMenu.length;
-		ArrayUtils.swap(newMenu, menuEntryCount - 1, menuEntryCount - 2);
+		if(swap)
+		{
+			ArrayUtils.swap(newMenu, menuEntryCount - 1, menuEntryCount - 2);
+		}
 		client.setMenuEntries(newMenu);
 	}
 
