@@ -153,7 +153,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	public void onGameTick(GameTick event)
 	{
 		updateCCPanel();
-		if(ccCount!=client.getClanChatCount())
+		if(client.getClanChatCount()>0 && ccCount!=client.getClanChatCount())
 		{
 			ccUpdate();
 			ccCount=client.getClanChatCount();
@@ -356,7 +356,21 @@ public class BASPlugin extends Plugin implements KeyListener
 	}
 	private void addCustomerToQueue(String name, String item)
 	{
-		if(client.getLocalPlayer().getName()==null)
+		if(client.getLocalPlayer().getName()==null || client.getClanChatCount()<1 || !client.getClanOwner().equals(ccName))
+		{
+			return;
+		}
+
+		boolean allow = false;
+		for(ClanMember member : client.getClanMembers())
+		{
+			if(client.getLocalPlayer().getName().equals(member.getUsername()) && member.getRank().getValue()>=0)
+			{
+				allow = true;
+			}
+		}
+
+		if(!allow)
 		{
 			return;
 		}
@@ -516,7 +530,7 @@ public class BASPlugin extends Plugin implements KeyListener
 
     private void ccUpdate()
 	{
-		if(lastCheckTick==client.getTickCount())
+		if(lastCheckTick==client.getTickCount() && !client.getClanOwner().equals(ccName))
 		{
 			return;
 		}
@@ -528,11 +542,6 @@ public class BASPlugin extends Plugin implements KeyListener
     
     private void checkUsers()
 	{
-		if(!client.getClanOwner().equals(ccName))
-		{
-			return;
-		}
-
 		for (ClanMember memberCM : client.getClanMembers())
 		{
 			String member = memberCM.getUsername();
@@ -620,7 +629,6 @@ public class BASPlugin extends Plugin implements KeyListener
 									if(!ccMembersList.contains(member.getText()))
 									{
 										ccMembersList.add(member.getText());
-										log.info("added " + member.getText());
 									}
 
 									switch (user[2])
@@ -700,23 +708,22 @@ public class BASPlugin extends Plugin implements KeyListener
 
 	private void updateQueue()
 	{
-		if(!config.autoUpdateQueue() || lastCheckTick == client.getTickCount() || !client.getClanOwner().equals(ccName))
+		if(!config.autoUpdateQueue())
 		{
 			return;
 		}
 
-		lastCheckTick = client.getTickCount();
 		String csv = "";
 		for (ClanMember member : client.getClanMembers())
 		{
 			String memberName = member.getUsername();
 			if (csv.equals(""))
 			{
-				csv = memberName;
+				csv = memberName+"#"+member.getRank().getValue();
 			}
 			else
 			{
-				csv = csv + "," + memberName;
+				csv = csv + "," + memberName+"#"+member.getRank().getValue();
 			}
 		}
 		if (csv.equals(""))
