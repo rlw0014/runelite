@@ -530,7 +530,7 @@ public class BASPlugin extends Plugin implements KeyListener
 
     private void ccUpdate()
 	{
-		if(lastCheckTick==client.getTickCount() && !client.getClanOwner().equals(ccName))
+		if(lastCheckTick==client.getTickCount() || !client.getClanOwner().equals(ccName))
 		{
 			return;
 		}
