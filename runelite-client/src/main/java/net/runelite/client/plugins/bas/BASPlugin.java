@@ -354,23 +354,31 @@ public class BASPlugin extends Plugin implements KeyListener
 			}
 		});
 	}
-	private void addCustomerToQueue(String name, String item)
+
+	private boolean isRank()
 	{
+
 		if(client.getLocalPlayer().getName()==null || client.getClanChatCount()<1 || !client.getClanOwner().equals(ccName))
 		{
-			return;
+			return false;
 		}
 
-		boolean allow = false;
+		boolean isRank = false;
+
 		for(ClanMember member : client.getClanMembers())
 		{
 			if(client.getLocalPlayer().getName().equals(member.getUsername()) && member.getRank().getValue()>=0)
 			{
-				allow = true;
+				isRank = true;
 			}
 		}
+		return isRank;
+	}
 
-		if(!allow)
+	private void addCustomerToQueue(String name, String item)
+	{
+
+		if(!isRank())
 		{
 			return;
 		}
@@ -530,7 +538,7 @@ public class BASPlugin extends Plugin implements KeyListener
 
     private void ccUpdate()
 	{
-		if(lastCheckTick==client.getTickCount() || !client.getClanOwner().equals(ccName))
+		if(lastCheckTick==client.getTickCount() || !isRank())
 		{
 			return;
 		}
@@ -539,7 +547,7 @@ public class BASPlugin extends Plugin implements KeyListener
 		updateQueue();
 		lastCheckTick=client.getTickCount();
 	}
-    
+
     private void checkUsers()
 	{
 		for (ClanMember memberCM : client.getClanMembers())
