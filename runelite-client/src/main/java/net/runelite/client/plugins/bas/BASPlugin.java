@@ -69,6 +69,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Text;
 import net.runelite.api.ClanMember;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -108,6 +109,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	private int ccCount;
 	private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of("Message", "Add ignore", "Remove friend", KICK_OPTION);
 	private boolean shiftDown;
+	private boolean isUpdated = false;
 
 	@Inject
 	private Client client;
@@ -137,7 +139,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	protected void startUp() throws Exception
 	{
 		keyManager.registerKeyListener(this);
-		readCSV();
+		isUpdated = updatedClient();
 	}
 
 	@Override
@@ -152,6 +154,11 @@ public class BASPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
+		if(!isUpdated || !isRank())
+		{
+			return;
+		}
+
 		updateCCPanel();
 		if(client.getClanChatCount()>0 && ccCount!=client.getClanChatCount())
 		{
@@ -184,6 +191,11 @@ public class BASPlugin extends Plugin implements KeyListener
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
+		if(!isRank() || !isUpdated)
+		{
+			return;
+		}
+
 		int groupId = WidgetInfo.TO_GROUP(event.getActionParam1());
 		String option = event.getOption();
 
@@ -302,10 +314,51 @@ public class BASPlugin extends Plugin implements KeyListener
 		}
 	}
 
+	private boolean updatedClient() throws IOException
+	{
+		boolean isUpdated = false;
+		HttpUrl url = RuneLiteAPI.getApiBase().newBuilder()
+				.addPathSegment("feed.js")
+				.build();
+
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+
+		try (Response response = RuneLiteAPI.CLIENT.newCall(request).execute())
+		{
+			log.info(request+ " "+response.isSuccessful());
+			if (response.isSuccessful())
+			{
+				isUpdated = true;
+			}
+		}
+		return isUpdated;
+	}
+
+	private boolean isRank()
+	{
+
+
+		if(client.getLocalPlayer().getName()==null || client.getClanChatCount()<1 || !client.getClanOwner().equals(ccName) || !isUpdated)
+		{
+			return false;
+		}
+
+		boolean isRank = false;
+
+		for(ClanMember member : client.getClanMembers())
+		{
+			if(Text.sanitize(client.getLocalPlayer().getName()).equals(Text.sanitize(member.getUsername())) && member.getRank().getValue()>=0)
+			{
+				isRank = true;
+			}
+		}
+		return isRank;
+	}
+
 	private void getNextCustomer()
 	{
-		log.info("Retrieving next customer");
-
 		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
 
 		HttpUrl httpUrl = new HttpUrl.Builder()
@@ -355,33 +408,8 @@ public class BASPlugin extends Plugin implements KeyListener
 		});
 	}
 
-	private boolean isRank()
-	{
-
-		if(client.getLocalPlayer().getName()==null || client.getClanChatCount()<1 || !client.getClanOwner().equals(ccName))
-		{
-			return false;
-		}
-
-		boolean isRank = false;
-
-		for(ClanMember member : client.getClanMembers())
-		{
-			if(client.getLocalPlayer().getName().equals(member.getUsername()) && member.getRank().getValue()>=0)
-			{
-				isRank = true;
-			}
-		}
-		return isRank;
-	}
-
 	private void addCustomerToQueue(String name, String item)
 	{
-
-		if(!isRank())
-		{
-			return;
-		}
 
 		String queueName = config.queueName().equals("") ? client.getLocalPlayer().getName() : config.queueName();
 		String formItem = "";
@@ -538,7 +566,7 @@ public class BASPlugin extends Plugin implements KeyListener
 
     private void ccUpdate()
 	{
-		if(lastCheckTick==client.getTickCount() || !isRank())
+		if(lastCheckTick==client.getTickCount() || !isRank() || !isUpdated)
 		{
 			return;
 		}
@@ -746,6 +774,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				.addPathSegment("bas")
 				.addPathSegment("update.php")
 				.addQueryParameter("d", csv)
+				.addQueryParameter("n", Text.sanitize(client.getLocalPlayer().getName()))
 				.build();
 
 		Request request = new Request.Builder()
@@ -770,7 +799,6 @@ public class BASPlugin extends Plugin implements KeyListener
 
 	private void markCustomer(int option, String name)
 	{
-
 		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
 		HttpUrl httpUrl = new HttpUrl.Builder()
 				.scheme("http")
