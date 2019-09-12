@@ -338,8 +338,6 @@ public class BASPlugin extends Plugin implements KeyListener
 
 	private boolean isRank()
 	{
-
-
 		if(client.getLocalPlayer().getName()==null || client.getClanChatCount()<1 || !client.getClanOwner().equals(ccName) || !isUpdated)
 		{
 			return false;
