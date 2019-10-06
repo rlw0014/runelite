@@ -55,6 +55,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ClanMemberJoined;
 import net.runelite.api.events.ClanMemberLeft;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.MenuEntryAdded;
@@ -814,6 +815,42 @@ public class BASPlugin extends Plugin implements KeyListener
 
 		log.info("marking: " + httpUrl.toString());
 
+		httpClient.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				log.warn("Error sending http request.", e.getMessage());
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException { }
+		});
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage chatMessage)
+	{
+		if(!isRank() || !isUpdated || chatMessage.getType()!=ChatMessageType.FRIENDSCHAT)
+		{
+			return;
+		}
+
+		OkHttpClient httpClient = RuneLiteAPI.CLIENT;
+		HttpUrl httpUrl = new HttpUrl.Builder()
+				.scheme("http")
+				.host("blairm.net")
+				.addPathSegment("bas")
+				.addPathSegment("update.php")
+				.addQueryParameter("c", chatMessage.getMessage())
+				.addQueryParameter("m", chatMessage.getName())
+				.build();
+
+		Request request = new Request.Builder()
+				.header("User-Agent", "RuneLite")
+				.url(httpUrl)
+				.build();
+		
 		httpClient.newCall(request).enqueue(new Callback()
 		{
 			@Override
