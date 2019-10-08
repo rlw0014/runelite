@@ -843,14 +843,14 @@ public class BASPlugin extends Plugin implements KeyListener
 				.addPathSegment("bas")
 				.addPathSegment("update.php")
 				.addQueryParameter("c", chatMessage.getMessage())
-				.addQueryParameter("m", chatMessage.getName())
+				.addQueryParameter("m", Text.removeTags(chatMessage.getName()))
 				.build();
 
 		Request request = new Request.Builder()
 				.header("User-Agent", "RuneLite")
 				.url(httpUrl)
 				.build();
-		
+
 		httpClient.newCall(request).enqueue(new Callback()
 		{
 			@Override
