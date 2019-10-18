@@ -97,6 +97,7 @@ public class BASPlugin extends Plugin implements KeyListener
 	private static final String BUY_HAT_PREM = "Prem Hat";
 	private static final String BUY_1R_REG = "Reg 1R Points";
 	private static final String BUY_1R_PREM = "Prem 1R Points";
+	private static final String updateFile = "24tj89fdD.php";
 	private static final int clanSetupWidgetID = 24;
 	private static final ImmutableList<String> BAS_OPTIONS = ImmutableList.of(MARK_DONE, MARK_INPROGRESS, MARK_NOTINPROGRESS);
 	private static final ImmutableList<String> BAS_BUY_OPTIONS = ImmutableList.of(BUY_1R_PREM,BUY_1R_REG,BUY_HAT_PREM,BUY_HAT_REG,BUY_QK_PREM,BUY_QK_REG,BUY_LVL5_PREM
@@ -364,7 +365,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				.scheme("http")
 				.host("blairm.net")
 				.addPathSegment("bas")
-				.addPathSegment("update.php")
+				.addPathSegment("24tj89fdD.php")
 				.addQueryParameter("n", "1")
 				.build();
 
@@ -496,7 +497,7 @@ public class BASPlugin extends Plugin implements KeyListener
 						.scheme("http")
 						.host("blairm.net")
 						.addPathSegment("bas")
-						.addPathSegment("update.php")
+						.addPathSegment("24tj89fdD.php")
 						.addQueryParameter("a", name.replace('\u00A0', ' '))
 						.build();
 
@@ -771,7 +772,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				.scheme("http")
 				.host("blairm.net")
 				.addPathSegment("bas")
-				.addPathSegment("update.php")
+				.addPathSegment("24tj89fdD.php")
 				.addQueryParameter("d", csv)
 				.addQueryParameter("n", Text.sanitize(client.getLocalPlayer().getName()))
 				.build();
@@ -803,7 +804,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				.scheme("http")
 				.host("blairm.net")
 				.addPathSegment("bas")
-				.addPathSegment("update.php")
+				.addPathSegment("24tj89fdD.php")
 				.addQueryParameter("o", option+"")
 				.addQueryParameter("n", name)
 				.build();
@@ -841,7 +842,7 @@ public class BASPlugin extends Plugin implements KeyListener
 				.scheme("http")
 				.host("blairm.net")
 				.addPathSegment("bas")
-				.addPathSegment("update.php")
+				.addPathSegment("24tj89fdD.php")
 				.addQueryParameter("c", chatMessage.getMessage())
 				.addQueryParameter("m", Text.removeTags(chatMessage.getName()))
 				.build();
