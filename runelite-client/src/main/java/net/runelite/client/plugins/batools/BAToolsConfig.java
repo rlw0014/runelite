@@ -1,0 +1,265 @@
+/*
+ * Copyright (c) 2018, Cameron <https://github.com/noremac201>
+ * Copyright (c) 2018, Jacob M <https://github.com/jacoblairm>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package net.runelite.client.plugins.batools;
+
+import net.runelite.client.config.Config;
+import net.runelite.client.config.ConfigGroup;
+import net.runelite.client.config.ConfigItem;
+
+@ConfigGroup("BATools")
+public interface BAToolsConfig extends Config
+{
+	@ConfigItem(
+		keyName = "removeBA",
+		name = "All Roles: *Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+	)
+	default boolean removeBA()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "attackStyles",
+		name = "Attacker: Attack Styles",
+		description = "Remove incorrect attack styles for hally/claws and if shift held down = all attack options are removed to help walk to the correct tiles"
+	)
+	default boolean attackStyles()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "tagging",
+		name = "Attacker: Attack Tags",
+		description = "Highlights the menu entry of an attacker/ranger that has not been tagged."
+	)
+	default boolean tagging()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "eggBoi",
+		name = "Collector helper",
+		description = "This places the correct egg on top when holding shift"
+	)
+	default boolean eggBoi()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "swapCollectorBag",
+		name = "Collector: Collector bag Empty left click",
+		description = "Make empty the left-click option on collector bag"
+	)
+	default boolean swapCollectorBag()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "swapDestroyEggs",
+		name = "Collector: Left click destroy eggs in BA",
+		description = "Make destroy the left-click option for collector eggs"
+	)
+	default boolean swapDestroyEggs()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "removeWrongEggs",
+		name = "Collector: Remove wrong eggs - *Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+	)
+	default boolean removeWrongEggs()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "defTimer",
+		name = "Defender: Tick Timer",
+		description = "Shows the current cycle tick of runners."
+	)
+	default boolean defTimer()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "calls",
+		name = "Misc: Remove Incorrect Calls",
+		description = "Remove incorrect calls."
+	)
+	default boolean calls()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "healerMenuOption",
+		name = "Healer: Menu options",
+		description = "Shows time since last food placed on healer"
+	)
+	default boolean healerMenuOption()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "healerCodes",
+		name = "Healer: Healer Codes",
+		description = "Overlay to show healer codes"
+	)
+	default boolean healerCodes()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "healerGreenColor",
+		name = "Healer: Green menu option",
+		description = "Toggle healer's menu option as green"
+	)
+	default boolean healerGreenColor()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "antiDrag",
+		name = "Misc: Anti Drag",
+		description = "asd"
+	)
+	default boolean antiDrag()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "antiDragDelay",
+		name = "Misc: Anti Drag Delay",
+		description = "Similar to antidrag plugin but does not require shift to be help down"
+	)
+	default int antiDragDelay()
+	{
+		return 5;
+	}
+
+	@ConfigItem(
+		keyName = "osHelp",
+		name = "Healer: Shift OS",
+		description = "Hold shift to only pick up correct eggs"
+	)
+	default boolean osHelp()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "prayerMetronome",
+		name = "Misc: Prayer Metronome",
+		description = "Similar to metronome plugin but only activates when a prayer is active"
+	)
+	default boolean prayerMetronome()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "prayerMetronomeVolume",
+		name = "Misc: Prayer Metronome Volume",
+		description = "Volume for Prayer Metronome"
+	)
+	default int prayerMetronomeVolume()
+	{
+		return 1;
+	}
+
+	@ConfigItem(
+		keyName = "removeWrongHealFood",
+		name = "Healer: Remove wrong Heal Food - *Barbarian Assault Helper*",
+		description = "Remove unnecessary menu options in Barbarian Assault depending on role<br>Examples: Remove attack options when not attacker<br>Remove take options when not collector"
+	)
+	default boolean removeHealWrongFood()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		   keyName = "ctrlHealer",
+		   name = "Healer: Control Healer",
+		   description = "Hold ctrl to put last healer clicked on top"
+	)
+	default boolean ctrlHealer()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "removePenanceCave",
+		name = "Misc: Remove 'Block' Penance Cave",
+		description = "Removes unnecessary menu option, however Moon wanted it back"
+	)
+	default boolean removePenanceCave()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "monsterDeathTimeChat",
+		name = "Misc: Monster Death Time in Chat",
+		description = "Shows time in seconds when a specific monster dies"
+	)
+	default boolean monsterDeathTimeChat()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "deathTimeBoxes",
+		name = "Misc: Monster Death Boxes",
+		description = "Shows info boxes when a specific monster dies and time"
+	)
+	default boolean deathTimeBoxes()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "shiftWalkHere",
+		name = "Misc: Shift-Click Walk here",
+		description = "Make Walk here the left-click option when holding shift"
+	)
+	default boolean shiftWalkHere()
+	{
+		return false;
+	}
+
+}

@@ -25,6 +25,7 @@
  */
 package net.runelite.client.plugins.barbarianassault;
 
+import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -35,19 +36,95 @@ public interface BarbarianAssaultConfig extends Config
 	@ConfigItem(
 		keyName = "showTimer",
 		name = "Show call change timer",
-		description = "Show time to next call change"
+		description = "Show time to next call change",
+		position = 0
 	)
-	default boolean showTimer()
-	{
-		return true;
-	}
+	default boolean showTimer()	{ return true; }
 
 	@ConfigItem(
 		keyName = "waveTimes",
 		name = "Show wave and game duration",
-		description = "Displays wave and game duration"
+		description = "Displays wave and game duration",
+        position = 1
+    )
+	default boolean waveTimes() { return true; }
+
+    @ConfigItem(
+        keyName = "showEggCountOverlay",
+        name = "Overlay of eggs counted",
+        description = "Display current egg count as collector",
+        position = 3
+    )
+    default boolean showEggCountOverlay() { return false; }
+
+	@ConfigItem(
+			keyName = "showHpCountOverlay",
+			name = "Overlay of Hp counted",
+			description = "Display current healed count as healer",
+			position = 5
 	)
-	default boolean waveTimes()
+	default boolean showHpCountOverlay() { return false; }
+
+	@ConfigItem(
+			keyName = "highlightCollectorEggs",
+			name = "Highlight collector eggs",
+			description = "Highlight called egg colors",
+			position = 6
+	)
+	default boolean highlightCollectorEggs() { return false; }
+
+	@ConfigItem(
+			keyName = "showTotalRewards",
+			name = "Summarize total reward points",
+			description = "Displays total eggs/healed hp and missed attacks/lost runners",
+			position = 7
+	)
+	default boolean showTotalRewards(){ return false; }
+
+	@ConfigItem(
+			keyName = "showSummaryOfPoints",
+			name = "Display summary of advanced points",
+			description = "Gives summary of advanced points breakdown in chat log",
+			position = 8
+    )
+	default boolean showSummaryOfPoints() { return false; }
+
+	@ConfigItem(
+			keyName = "wrongPoisonFoodTextColor",
+			name = "Change healer wrong poison pack color",
+			description = "Change healer wrong poison pack color",
+			position = 9
+	)
+	default Color wrongPoisonFoodTextColor() { return Color.BLACK;}
+
+    @ConfigItem(
+			keyName = "highlightItems",
+			name = "Highlight called poison/bait/arrows",
+			description = "Highlights the poison or bait that was called by your teammate",
+			position = 10
+	)
+	default boolean highlightItems()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "highlightColor",
+			name = "Highlight color",
+			description = "Configures the color to highlight the called poison/bait/arrows",
+			position = 11
+	)
+	default Color highlightColor()
+	{
+		return Color.GREEN;
+	}
+
+	@ConfigItem(
+		   keyName = "EndCallSoundEffect",
+		   name = "End of Call Sound",
+		   description = "Plays a sound before call changes"
+	)
+	default boolean playEndCallSoundEffect()
 	{
 		return true;
 	}
