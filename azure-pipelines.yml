@@ -17,7 +17,7 @@ steps:
       goals: 'install'
   - task: CopyFiles@2
     inputs:
-      contents: '**/*SNAPSHOT.jar'
+      contents: '**/*SNAPSHOT-shaded.jar'
       targetFolder: '$(build.artifactStagingDirectory)'
   - task: PublishBuildArtifacts@1
 
